@@ -18,7 +18,14 @@ public class CustomersController : ControllerBase{
 
     [HttpGet]
     public ActionResult<IEnumerable<Customer>> GetCustomers(){
-       var result = Data.getInstance();
+       var listCustomer = Data.getInstance().Customers;
+       var result = new List<CustomerDto>();
+       
+       foreach(Customer c in listCustomer){
+            var newC = new CustomerDto(c.Name, c.Cpf, c.Id);
+            result.Add(newC);  
+       }
+
        return Ok(result);
     }
 
@@ -27,10 +34,12 @@ public class CustomersController : ControllerBase{
         //O n dentro da lambda é o objeto customer pq o FirstOrDefault() retorna elemento de mesma tipagem, por isso é possível interagi com o Id e compara-lo
         var customer = Data.getInstance().Customers.FirstOrDefault(n => n.Id == id);
         if(customer == null){return NotFound();}
-        return Ok(customer);
+        var dtoCustomer = new CustomerDto(customer.Name, customer.Cpf, customer.Id);
+
+        return Ok(dtoCustomer);
 
         //testa customer diferente de null, se for efetua a opção 1 se não efetua a segunda opção
-        // return customer != null ? Ok(customer) : NotFound("Deu merda");
+        // return customer != null ? Ok(customer) : NotFound();
 
     }
 
@@ -39,10 +48,12 @@ public class CustomersController : ControllerBase{
         //O n dentro da lambda é o objeto customer pq o FirstOrDefault() retorna elemento de mesma tipagem, por isso é possível interagi com o Id e compara-lo
         var customer = Data.getInstance().Customers.FirstOrDefault(n => n.Cpf == cpf);
         if(customer == null){return NotFound();}
+        var dtoCustomer = new CustomerDto(customer.Name, customer.Cpf, customer.Id);
+
         return Ok(customer);
 
         //testa customer diferente de null, se for efetua a opção 1 se não efetua a segunda opção
-        // return customer != null ? Ok(customer) : NotFound("Deu merda");
+        // return customer != null ? Ok(customer) : NotFound();
 
     }
 
@@ -53,8 +64,8 @@ public class CustomersController : ControllerBase{
 
         var rightCustomer = Data.getInstance().Customers.FirstOrDefault(n => n.Cpf == newCustomer.Cpf);
         if(rightCustomer != null){return Conflict();}
-        else{Data.getInstance().Customers.Add(newCustomer);}
-        
+        Data.getInstance().Customers.Add(newCustomer);
+
         return CreatedAtRoute(
             "GetCustomerById",
             new {id = newCustomer.Id},
@@ -67,17 +78,11 @@ public class CustomersController : ControllerBase{
         var updatedCustomer = new CustomerDto(customer.Name, customer.Cpf, Id);
 
         var rightCustomer = Data.getInstance().Customers.FirstOrDefault(n => n.Id == updatedCustomer.Id);
-        if(rightCustomer == null){return NoContent();}
-        else{
-            Data.getInstance().Customers.Remove(rightCustomer);
-            Data.getInstance().Customers.Add(updatedCustomer);
-        }
-        
-        return CreatedAtRoute(
-            "GetCustomerById",
-            new {id = updatedCustomer.Id},
-            updatedCustomer
-        );
+        if(rightCustomer == null){return NotFound();}
+        Data.getInstance().Customers.Remove(rightCustomer);
+        Data.getInstance().Customers.Add(updatedCustomer);
+    
+        return NoContent();
     }
 
     [HttpDelete("{id}")]

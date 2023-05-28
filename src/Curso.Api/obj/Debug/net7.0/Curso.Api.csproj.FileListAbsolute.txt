@@ -124,3 +124,34 @@ C:/Users/7620586/Downloads/CursoApi-main/src/Curso.Api/obj/Debug/net7.0/ref/Curs
 /home/miguel/Projects/Curso/CursoApi-main /src/Curso.Api/obj/Debug/net7.0/Curso.Api.pdb
 /home/miguel/Projects/Curso/CursoApi-main /src/Curso.Api/obj/Debug/net7.0/Curso.Api.genruntimeconfig.cache
 /home/miguel/Projects/Curso/CursoApi-main /src/Curso.Api/obj/Debug/net7.0/ref/Curso.Api.dll
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/bin/Debug/net7.0/Curso.Api
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/bin/Debug/net7.0/Curso.Api.deps.json
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/bin/Debug/net7.0/Curso.Api.runtimeconfig.json
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/bin/Debug/net7.0/Curso.Api.dll
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/bin/Debug/net7.0/Curso.Api.pdb
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/bin/Debug/net7.0/Microsoft.AspNetCore.OpenApi.dll
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/bin/Debug/net7.0/Microsoft.OpenApi.dll
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/bin/Debug/net7.0/Swashbuckle.AspNetCore.Swagger.dll
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/bin/Debug/net7.0/Swashbuckle.AspNetCore.SwaggerGen.dll
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/bin/Debug/net7.0/Swashbuckle.AspNetCore.SwaggerUI.dll
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/Curso.Api.csproj.AssemblyReference.cache
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/Curso.Api.GeneratedMSBuildEditorConfig.editorconfig
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/Curso.Api.AssemblyInfoInputs.cache
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/Curso.Api.AssemblyInfo.cs
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/Curso.Api.csproj.CoreCompileInputs.cache
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/Curso.Api.MvcApplicationPartsAssemblyInfo.cs
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/Curso.Api.MvcApplicationPartsAssemblyInfo.cache
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/staticwebassets/msbuild.Curso.Api.Microsoft.AspNetCore.StaticWebAssets.props
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/staticwebassets/msbuild.build.Curso.Api.props
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/staticwebassets/msbuild.buildMultiTargeting.Curso.Api.props
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/staticwebassets/msbuild.buildTransitive.Curso.Api.props
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/staticwebassets.pack.json
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/staticwebassets.build.json
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/staticwebassets.development.json
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/scopedcss/bundle/Curso.Api.styles.css
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/Curso.Api.csproj.CopyComplete
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/Curso.Api.dll
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/refint/Curso.Api.dll
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/Curso.Api.pdb
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/Curso.Api.genruntimeconfig.cache
+/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/Debug/net7.0/ref/Curso.Api.dll

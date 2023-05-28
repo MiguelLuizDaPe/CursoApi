@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "BNtmKGvHG326VByw8IE2DYJ5bzLdJssXiPY3VpE3OC8SXiNNpJdO2IYbd+NIShWOuTagr75iLnSEESa2wv3YYw==",
+  "dgSpecHash": "3AzMQ2lxVocSOQ1giUrZdO7QrB03AM8F/o48LP8xvN0Gy1BBt0IHWgQHluq2oOFyjAcScCdCS3cl8qK5bhgyFQ==",
   "success": true,
-  "projectFilePath": "/home/miguel/Projects/Curso/CursoApi-main /src/Curso.Api/Curso.Api.csproj",
+  "projectFilePath": "/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/Curso.Api.csproj",
   "expectedPackageFiles": [
     "/home/miguel/.nuget/packages/microsoft.aspnetcore.openapi/7.0.5/microsoft.aspnetcore.openapi.7.0.5.nupkg.sha512",
     "/home/miguel/.nuget/packages/microsoft.extensions.apidescription.server/6.0.5/microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",
