@@ -27,13 +27,13 @@ public class CustomersController : ControllerBase{
         //O n dentro da lambda é o objeto customer pq o FirstOrDefault() retorna elemento de mesma tipagem, por isso é possível interagi com o Id e compara-lo
         var customer = Data.getInstance().Customers.FirstOrDefault(n => n.Id == id);
         if(customer == null){return NotFound();}
-        var customerDto = new CustomerDto{
+        var customerForReturn = new CustomerDto{
             Id = customer.Id,
             Name = customer.Name, 
             Cpf = customer.Cpf
         };
 
-        return Ok(customerDto);
+        return Ok(customerForReturn);
 
         //testa customer diferente de null, se for efetua a opção 1 se não efetua a segunda opção
         // return customer != null ? Ok(customer) : NotFound();
