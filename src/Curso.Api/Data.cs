@@ -7,16 +7,16 @@ namespace Curso.Api{
 
         private Data(){
             this.Customers = new List<Customer>{
-                new Customer{
-                    Id = 1,
-                    Name = "Pedro",
-                    Cpf = "123456789123"
-                },
-                new Customer{
-                    Id = 2,
-                    Name = "Pepino",
-                    Cpf = "123999789993"
-                }
+                new Customer(
+                    1,
+                    "Pedro",
+                    "123456789123"
+                ),
+                new Customer(
+                    2,
+                    "Pepino",
+                    "123999789993"
+                )
             };
         }
 
