@@ -1,6 +1,7 @@
 using Curso.Api;
 using Microsoft.AspNetCore.Mvc;
 using Curso.Api.Entities;
+using Cursp.Api.Models;
 
 namespace Curso.Api.Controllers;
 
@@ -14,7 +15,7 @@ public class CustomersController : ControllerBase{
        var result = new List<CustomerDto>();
        
        foreach(Customer c in listCustomer){
-            var newC = new CustomerDto(c.Id, c.Name, c.Cpf);
+            var newC = new CustomerDto{Id = c.Id, Name = c.Name, Cpf = c.Cpf};
             result.Add(newC);  
        }
 
@@ -26,9 +27,13 @@ public class CustomersController : ControllerBase{
         //O n dentro da lambda é o objeto customer pq o FirstOrDefault() retorna elemento de mesma tipagem, por isso é possível interagi com o Id e compara-lo
         var customer = Data.getInstance().Customers.FirstOrDefault(n => n.Id == id);
         if(customer == null){return NotFound();}
-        var dtoCustomer = new CustomerDto(customer.Id, customer.Name, customer.Cpf);
+        var customerDto = new CustomerDto{
+            Id = customer.Id,
+            Name = customer.Name, 
+            Cpf = customer.Cpf
+        };
 
-        return Ok(dtoCustomer);
+        return Ok(customerDto);
 
         //testa customer diferente de null, se for efetua a opção 1 se não efetua a segunda opção
         // return customer != null ? Ok(customer) : NotFound();
@@ -40,7 +45,11 @@ public class CustomersController : ControllerBase{
         //O n dentro da lambda é o objeto customer pq o FirstOrDefault() retorna elemento de mesma tipagem, por isso é possível interagi com o Id e compara-lo
         var customer = Data.getInstance().Customers.FirstOrDefault(n => n.Cpf == cpf);
         if(customer == null){return NotFound();}
-        var dtoCustomer = new CustomerDto(customer.Id, customer.Name, customer.Cpf);
+        var dtoCustomer = new CustomerDto{
+            Id = customer.Id,
+            Name = customer.Name, 
+            Cpf = customer.Cpf
+        };;
 
         return Ok(dtoCustomer);
 
