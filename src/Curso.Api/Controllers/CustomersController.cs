@@ -1,7 +1,8 @@
 using Curso.Api;
 using Microsoft.AspNetCore.Mvc;
 using Curso.Api.Entities;
-using Cursp.Api.Models;
+using Curso.Api.Models;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace Curso.Api.Controllers;
 
@@ -11,27 +12,28 @@ public class CustomersController : ControllerBase{
 
     [HttpGet]
     public ActionResult<IEnumerable<CustomerDto>> GetCustomers(){
-       var listCustomer = Data.getInstance().Customers; //.Select(c => new CustomerDto {Id = c.Id, });
-       var result = new List<CustomerDto>();
+       var customersForReturn = Data.getInstance().Customers.Select(c => new CustomerDto (c.Id, c.Name, c.Cpf));
+       // meu código a baixo, é a mesma coisa que a putaria do select, mas é mais usado o select
+    //    var customersForReturn = new List<CustomerDto>();
        
-       foreach(Customer c in listCustomer){
-            var newC = new CustomerDto{Id = c.Id, Name = c.Name, Cpf = c.Cpf};
-            result.Add(newC);  
-       }
+    //    foreach(Customer c in listCustomer){
+    //         var newC = new CustomerDto{Id = c.Id, Name = c.Name, Cpf = c.Cpf};
+    //         result.Add(newC);  
+    //    }
 
-       return Ok(result);
+       return Ok(customersForReturn);
     }
 
     [HttpGet("{id}", Name = "GetCustomerById")]
     public ActionResult<CustomerDto> GetCustomerById(int id){
         //O n dentro da lambda é o objeto customer pq o FirstOrDefault() retorna elemento de mesma tipagem, por isso é possível interagi com o Id e compara-lo
-        var customer = Data.getInstance().Customers.FirstOrDefault(n => n.Id == id);
-        if(customer == null){return NotFound();}
-        var customerForReturn = new CustomerDto{
-            Id = customer.Id,
-            Name = customer.Name, 
-            Cpf = customer.Cpf
-        };
+        var customerFromDatabase = Data.getInstance().Customers.FirstOrDefault(n => n.Id == id);
+        if(customerFromDatabase == null){return NotFound();}
+        var customerForReturn = new CustomerDto(
+            customerFromDatabase.Id,
+            customerFromDatabase.Name, 
+            customerFromDatabase.Cpf
+        );
 
         return Ok(customerForReturn);
 
@@ -43,13 +45,13 @@ public class CustomersController : ControllerBase{
     [HttpGet("cpf/{cpf}")]
     public ActionResult<CustomerDto> GetCustomerCpf(string cpf){
         //O n dentro da lambda é o objeto customer pq o FirstOrDefault() retorna elemento de mesma tipagem, por isso é possível interagi com o Id e compara-lo
-        var customer = Data.getInstance().Customers.FirstOrDefault(n => n.Cpf == cpf);
-        if(customer == null){return NotFound();}
-        var dtoCustomer = new CustomerDto{
-            Id = customer.Id,
-            Name = customer.Name, 
-            Cpf = customer.Cpf
-        };;
+        var customerFromDatabase = Data.getInstance().Customers.FirstOrDefault(n => n.Cpf == cpf);
+        if(customerFromDatabase == null){return NotFound();}
+        var dtoCustomer = new CustomerDto(
+            customerFromDatabase.Id,
+            customerFromDatabase.Name, 
+            customerFromDatabase.Cpf
+        );
 
         return Ok(dtoCustomer);
 
@@ -60,40 +62,49 @@ public class CustomersController : ControllerBase{
 
     //adiciona em elemento,masi pra frente boto pra adicionar em lista
     [HttpPost]
-    public ActionResult<CustomerDto> CreateCustomer(CustomerDto customer){
+    public ActionResult<CustomerDto> CreateCustomer(CustomerForCreationDto customerForCreationDto){
 
-        var rightCustomer = Data.getInstance().Customers.FirstOrDefault(n => n.Cpf == customer.Cpf);
+        var rightCustomer = Data.getInstance().Customers.FirstOrDefault(n => n.Cpf == customerForCreationDto.Cpf);
         if(rightCustomer != null){return Conflict();}
 
-        var newCustomer = new Customer(
+        var customerEntity = new Customer(
             Data.getInstance().Customers.Max(n => n.Id) + 1, 
-            customer.Name, 
-            customer.Cpf
+            customerForCreationDto.Name, 
+            customerForCreationDto.Cpf
         );
 
-        Data.getInstance().Customers.Add(newCustomer);
+        Data.getInstance().Customers.Add(customerEntity);
+
+        var customerForReturn = new CustomerDto(
+            customerEntity.Id, 
+            customerForCreationDto.Name, 
+            customerForCreationDto.Cpf
+        );
+
 
         return CreatedAtRoute(
             "GetCustomerById",
-            new {id = newCustomer.Id},
-            newCustomer
+            new {id = customerForReturn.Id},
+            customerForReturn
         );
     }
 
     [HttpPut("{id}")]
-    public ActionResult<CustomerDto> PutCustomer(CustomerDto customer, int Id){
+    public ActionResult UpdateCustomer( int Id, CustomerForUpdateDto customerForUpdateDto){
+        //verificação de Id pq pode acontecer um ataque malicioso com intenções maléficas de pura maldade
+        if(Id != customerForUpdateDto.Id){return BadRequest();}
 
         var rightCustomer = Data.getInstance().Customers.FirstOrDefault(n => n.Id == Id);
         if(rightCustomer == null){return NotFound();}
 
         var updatedCustomer = new Customer(
-            Id,
-            customer.Name,
-            customer.Cpf
+            customerForUpdateDto.Id,
+            customerForUpdateDto.Name,
+            customerForUpdateDto.Cpf
         );
 
-        Data.getInstance().Customers.Remove(rightCustomer);
-        Data.getInstance().Customers.Add(updatedCustomer);
+        rightCustomer.Name = customerForUpdateDto.Name;
+        rightCustomer.Cpf = customerForUpdateDto.Cpf;
     
         return NoContent();
     }
@@ -104,5 +115,25 @@ public class CustomersController : ControllerBase{
         if(customer == null){return NotFound();}
         Data.getInstance().Customers.Remove(customer);
         return NoContent();
+    }
+
+    //quando possível pesquisar sobre isso (talvez)
+    [HttpPatch("{id}")]
+    public ActionResult PartiallyUpdateCustomer([FromBody] JsonPatchDocument<CustomerForPatchDto> patchDocument, [FromRoute] int id){
+        var customerFromDatabase = Data.getInstance().Customers.FirstOrDefault(n => n.Id == id);
+        if(customerFromDatabase == null){return NotFound();}
+
+        var customerToPatch = new CustomerForPatchDto{
+            Name = customerFromDatabase.Name,
+            Cpf = customerFromDatabase.Cpf
+        };
+
+        patchDocument.ApplyTo(customerToPatch);
+
+        customerFromDatabase.Name = customerToPatch.Name;
+        customerFromDatabase.Cpf = customerToPatch.Cpf;
+
+        return NoContent();
+
     }
 }

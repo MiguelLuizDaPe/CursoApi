@@ -10,17 +10,6 @@ public class Customer{
         this.Name = Name;
     }
 }
-// public class CustomerDto{
-//     public int Id {get; set;}
-//     public string Name {get; set;} = "";
-//     public string Cpf {get; set;} = "";
-//     public CustomerDto(int Id,string Name, string Cpf, string cpf)
-//     {
-//         this.Id = Id;
-//         this.Cpf = Cpf;
-//         this.Name = Name;
-//     }
-// }
 
 public class Endereco{
     public string logradouro {get; set;} = "";
