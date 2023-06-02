@@ -9,7 +9,8 @@ builder.WebHost.ConfigureKestrel(options => {
 // Add services to the container.
 //aqui foi configurado pra transformar em .json(eu acho)
 builder.Services.AddControllers(options => options.InputFormatters.Insert(0, MyJPIF.GetJsonPatchInputFormatter())
-);
+//coloca essa porra pq o creatCustomer tava retornando 400 e não 422 pq a apicontroller tava resolvendo o problema sozinho ao envés de deixar dar merda
+).ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

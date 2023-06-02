@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Curso.Api.Entities;
 using Curso.Api.Models;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace Curso.Api.Controllers;
 
@@ -60,12 +61,19 @@ public class CustomersController : ControllerBase{
 
     }
 
-    //adiciona em elemento,masi pra frente boto pra adicionar em lista
     [HttpPost]
     public ActionResult<CustomerDto> CreateCustomer(CustomerForCreationDto customerForCreationDto){
 
-        var rightCustomer = Data.getInstance().Customers.FirstOrDefault(n => n.Cpf == customerForCreationDto.Cpf);
-        if(rightCustomer != null){return Conflict();}
+        if(!ModelState.IsValid){
+            //Cria a fábrica de um objeto de detalhes de um problema de validação
+            var problemDetailsFactory = HttpContext.RequestServices.GetRequiredService<ProblemDetailsFactory>();
+            //Cria um objeto de detalhes de um problema de validação
+            var validationProblemDetails = problemDetailsFactory.CreateValidationProblemDetails(HttpContext, ModelState);
+            //Aribui o statis code 422 no corpo do response
+            validationProblemDetails.Status = StatusCodes.Status422UnprocessableEntity;
+
+            return UnprocessableEntity(validationProblemDetails)/*que é um erro 422*/;
+        }
 
         var customerEntity = new Customer(
             Data.getInstance().Customers.Max(n => n.Id) + 1, 
@@ -125,7 +133,7 @@ public class CustomersController : ControllerBase{
 
         var customerToPatch = new CustomerForPatchDto{
             Name = customerFromDatabase.Name,
-            Cpf = customerFromDatabase.Cpf
+            Cpf = customerFromDatabase.Cpf,
         };
 
         patchDocument.ApplyTo(customerToPatch);
@@ -136,4 +144,16 @@ public class CustomersController : ControllerBase{
         return NoContent();
 
     }
+
+    [HttpGet("with-address")]
+    public ActionResult<IEnumerable<CustomerWithAddressesDto>>(){
+        //pega com alguem depois seu cabaço
+        var customerFromDatabase = Data.getInstance().Customers;
+        var customersToReturn = customerFromDatabase.Select(customer => )
+
+        return Ok(customerToReturn) // não precisa de .ToList() pq o Ok() serializa
+    }
+
+
+
 }
