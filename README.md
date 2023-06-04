@@ -1,6 +1,6 @@
 ## Coisas pra fazer
  - ESTUDAR LAMBDA ESPRESSÃO E LAMBDA STATEMENT
-## Baixar essas coisas
+## Baixar essas coisas(não precisou pq baixei localmente no código)
  - Microsoft.AspNetCore.JsonPatch
  - Microsoft.AspNetCore.Mvc.NewtonsoftJson
  - "dotnet tool install --global dotnet-ef" pra ver depois isso
