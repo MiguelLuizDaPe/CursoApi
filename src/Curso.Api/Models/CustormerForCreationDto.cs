@@ -13,5 +13,4 @@ public class CustomerForCreationDto{
     // [RegularExpression] da pra meter um regex
     [StringLength(11, MinimumLength = 11,  ErrorMessage = "The cpf should have 11 numbers")]
     public string Cpf {get;set;} = "";
-    public List<Endereco> Enderecos {get;set;}
 }

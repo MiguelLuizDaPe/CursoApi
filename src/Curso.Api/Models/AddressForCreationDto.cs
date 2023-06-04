@@ -1,6 +1,6 @@
-namespace Curso.Api.Entities;
-public class Address{
-    public int Id {get; set;}
+namespace Curso.Api.Models;
+
+public class AddressForCreationDto{
     public string Street {get; set;} = "";
     public string City {get; set;} = "";
 }

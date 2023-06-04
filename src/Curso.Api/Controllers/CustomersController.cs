@@ -11,9 +11,21 @@ namespace Curso.Api.Controllers;
 [Route("api/customers")]
 public class CustomersController : ControllerBase{
 
+    private int addrIdMax = 0;
+    private int genUniqueAddrId(){
+        if(addrIdMax == 0){
+            foreach(Customer c in Data.getInstance().Customers){
+                int idMax = c.Addresses.Max(n => n.Id);
+                if(idMax > addrIdMax){addrIdMax = idMax;}
+            }
+        }
+        addrIdMax += 1;
+        return addrIdMax;
+    }
+
     [HttpGet]
     public ActionResult<IEnumerable<CustomerDto>> GetCustomers(){
-       var customersForReturn = Data.getInstance().Customers.Select(c => new CustomerDto (c.Id, c.Name, c.Cpf));
+       var customersForReturn = Data.getInstance().Customers.Select(c => new CustomerDto{Id = c.Id, Name = c.Name, Cpf = c.Cpf});
        // meu código a baixo, é a mesma coisa que a putaria do select, mas é mais usado o select
     //    var customersForReturn = new List<CustomerDto>();
        
@@ -30,11 +42,11 @@ public class CustomersController : ControllerBase{
         //O n dentro da lambda é o objeto customer pq o FirstOrDefault() retorna elemento de mesma tipagem, por isso é possível interagi com o Id e compara-lo
         var customerFromDatabase = Data.getInstance().Customers.FirstOrDefault(n => n.Id == id);
         if(customerFromDatabase == null){return NotFound();}
-        var customerForReturn = new CustomerDto(
-            customerFromDatabase.Id,
-            customerFromDatabase.Name, 
-            customerFromDatabase.Cpf
-        );
+        var customerForReturn = new CustomerDto{
+            Id = customerFromDatabase.Id,
+            Name = customerFromDatabase.Name, 
+            Cpf = customerFromDatabase.Cpf
+        };
 
         return Ok(customerForReturn);
 
@@ -48,11 +60,11 @@ public class CustomersController : ControllerBase{
         //O n dentro da lambda é o objeto customer pq o FirstOrDefault() retorna elemento de mesma tipagem, por isso é possível interagi com o Id e compara-lo
         var customerFromDatabase = Data.getInstance().Customers.FirstOrDefault(n => n.Cpf == cpf);
         if(customerFromDatabase == null){return NotFound();}
-        var dtoCustomer = new CustomerDto(
-            customerFromDatabase.Id,
-            customerFromDatabase.Name, 
-            customerFromDatabase.Cpf
-        );
+        var dtoCustomer = new CustomerDto{
+            Id = customerFromDatabase.Id,
+            Name = customerFromDatabase.Name, 
+            Cpf = customerFromDatabase.Cpf
+        };
 
         return Ok(dtoCustomer);
 
@@ -75,19 +87,19 @@ public class CustomersController : ControllerBase{
             return UnprocessableEntity(validationProblemDetails)/*que é um erro 422*/;
         }
 
-        var customerEntity = new Customer(
-            Data.getInstance().Customers.Max(n => n.Id) + 1, 
-            customerForCreationDto.Name, 
-            customerForCreationDto.Cpf
-        );
+        var customerEntity = new Customer{
+            Id = Data.getInstance().Customers.Max(n => n.Id) + 1, 
+            Name = customerForCreationDto.Name, 
+            Cpf = customerForCreationDto.Cpf
+        };
 
         Data.getInstance().Customers.Add(customerEntity);
 
-        var customerForReturn = new CustomerDto(
-            customerEntity.Id, 
-            customerForCreationDto.Name, 
-            customerForCreationDto.Cpf
-        );
+        var customerForReturn = new CustomerDto{
+            Id = customerEntity.Id, 
+            Name = customerForCreationDto.Name, 
+            Cpf = customerForCreationDto.Cpf
+        };
 
 
         return CreatedAtRoute(
@@ -146,14 +158,104 @@ public class CustomersController : ControllerBase{
     }
 
     [HttpGet("with-address")]
-    public ActionResult<IEnumerable<CustomerWithAddressesDto>>(){
-        //pega com alguem depois seu cabaço
-        var customerFromDatabase = Data.getInstance().Customers;
-        var customersToReturn = customerFromDatabase.Select(customer => )
+    public ActionResult<IEnumerable<CustomerWithAddressesDto>> GetCustomersWithAddresses(){
+        
+        var customersFromDatabase = Data.getInstance().Customers;
+        var customersToReturn = customersFromDatabase.Select(customer => new CustomerWithAddressesDto{
+            Id = customer.Id,
+            Name = customer.Name,
+            Cpf = customer.Cpf,
+            Addresses = customer.Addresses.Select(address => new AddressDto{
+                Id = address.Id,
+                Street = address.Street,
+                City = address.City
+            }).ToList()
 
-        return Ok(customerToReturn) // não precisa de .ToList() pq o Ok() serializa
+        });
+
+        return Ok(customersToReturn); // O customerToReturn não precisa de .ToList() pq o Ok() serializa
     }
 
+    [HttpGet("{id}/with-address")]
+    public ActionResult<CustomerWithAddressesDto> GetCustomerWithAddresses(int id){
 
+        var customerFromDatabase = Data.getInstance().Customers.FirstOrDefault(n => n.Id == id);
+        if(customerFromDatabase == null){return NotFound();}
+
+        var customerForReturn = new CustomerWithAddressesDto{
+            Id = customerFromDatabase.Id,
+            Name = customerFromDatabase.Name, 
+            Cpf = customerFromDatabase.Cpf,
+            Addresses = customerFromDatabase.Addresses.Select(a => new AddressDto{
+                Id = a.Id,
+                Street = a.Street,
+                City = a.City
+            }).ToList()
+        };
+
+        return Ok(customerForReturn);
+    }
+
+    [HttpPost("with-address")]
+    public ActionResult<CustomerWithAddressesDto> CreatCustomerWithAddresses(int id, CustomerWithAddressesForCreationDto customerWithAddressesForCreationDto){
+            // int n = 0;
+            // int x = n++ + ++n;
+        
+        var customerEntity = new Customer{
+            Id = Data.getInstance().Customers.Max(n => n.Id) + 1,
+            Name = customerWithAddressesForCreationDto.Name,
+            Cpf = customerWithAddressesForCreationDto.Cpf,
+            Addresses = customerWithAddressesForCreationDto.Addresses.Select(a => new Address{
+                Id = genUniqueAddrId(), // Desse jeito não funciona para esse caso pois ele não tem acesso 
+                Street = a.Street,      //a ele mesmo para colocar um id diferente no próximo da lista
+                City = a.City
+            }).ToList()
+        };
+
+        Data.getInstance().Customers.Add(customerEntity);
+
+        var customerForReturn = new CustomerWithAddressesDto{
+            Id = customerEntity.Id,
+            Name = customerWithAddressesForCreationDto.Name,
+            Cpf = customerWithAddressesForCreationDto.Cpf,
+            Addresses = customerEntity.Addresses.Select(a => new AddressDto{
+                Id = a.Id,
+                Street = a.Street,
+                City = a.City
+            }).ToList()
+        };
+
+        return CreatedAtRoute(
+            "GetCustomerById",
+            new {id = customerForReturn.Id},
+            customerForReturn
+        );
+    }
+
+    [HttpPut("{id}/with-address")]
+    public ActionResult UpdateCustomerWithAddresses(int id, CustomerWithAddressesForUpdateDto customerWithAddressesForUpdateDto){
+        if(id != customerWithAddressesForUpdateDto.Id){ return BadRequest();}
+
+        var rightCustomer = Data.getInstance().Customers.FirstOrDefault(n => n.Id == id);
+        if(rightCustomer == null){ return BadRequest();}
+
+        var updatedCustomer = new Customer{
+            Id = customerWithAddressesForUpdateDto.Id,
+            Name = customerWithAddressesForUpdateDto.Name,
+            Cpf = customerWithAddressesForUpdateDto.Cpf,
+            Addresses = customerWithAddressesForUpdateDto.Addresses.Select(a => new Address{
+                Id = genUniqueAddrId(),
+                Street = a.Street,
+                City = a.City
+            }).ToList()
+        };
+
+        rightCustomer.Name = updatedCustomer.Name;
+        rightCustomer.Cpf = updatedCustomer.Cpf;
+        rightCustomer.Addresses = updatedCustomer.Addresses;
+
+        return NoContent();
+
+    }
 
 }

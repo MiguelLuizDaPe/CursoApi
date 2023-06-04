@@ -18,11 +18,5 @@ public class CustomerDto{
     public int Id {get; set;}
     public string Name {get; set;} = "";
     public string Cpf {get; set;} = "";
-    public List<Address> Enderecos {get; set;}
-    public CustomerDto(int Id, string Name, string Cpf){
-        this.Id = Id;
-        this.Cpf = Cpf;
-        this.Name = Name;
-        this.Enderecos = Enderecos;
-    }
+
 }

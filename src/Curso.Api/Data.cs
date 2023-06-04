@@ -26,13 +26,13 @@ namespace Curso.Api{
                     Cpf = "123999789993",
                     Addresses = new List<Address>{
                         new Address{
-                            Id = 1,
+                            Id = 2,
                             Street = "aquela",
                             City = "ali ó"
 
                         },
                         new Address{
-                            Id = 2,
+                            Id = 3,
                             Street = "aqueluio",
                             City = "Céu"
 
