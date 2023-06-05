@@ -6,11 +6,17 @@ namespace Curso.Api.Controllers;
 
 [ApiController]
 [Route("api/customers/{customerId}/addresses")]
-public class AddressController : ControllerBase{
+public class AddressesController : ControllerBase{
+
+    private readonly Data _data;
+
+    public AddressesController(Data data){//essa porra é uma injeção de dependência
+        _data = data ?? throw new ArgumentNullException(nameof(data));
+    }
 
     [HttpGet] //copiar essa porra de alguém depois também
     public ActionResult<IEnumerable<AddressDto>> GetAdresses(int customerId){
-        var customerFromDatabase = Data.getInstance().Customers.FirstOrDefault(
+        var customerFromDatabase = _data.Customers.FirstOrDefault(
             customer => customer.Id == customerId
         );
 
@@ -25,7 +31,7 @@ public class AddressController : ControllerBase{
 
     [HttpGet("{addressId}", Name = "GetAddressById")]
     public ActionResult<AddressDto> GetAddress( int customerId, int addressId){
-        var customerFromDatabase = Data.getInstance().Customers.FirstOrDefault(c => c.Id == customerId);
+        var customerFromDatabase = _data.Customers.FirstOrDefault(c => c.Id == customerId);
         if(customerFromDatabase == null){return NotFound();}
 
         var addressFromCustomer = customerFromDatabase.Addresses.FirstOrDefault(a => a.Id == addressId);
@@ -36,20 +42,21 @@ public class AddressController : ControllerBase{
         return Ok(addressToReturn);
 
 
-        //var addressToReturn = Data.getInstance().Customers.FirstOrDefault(c => c.Id == customerId).Addresses.FirstOrDefault(a => a.Id == addressId);
+        //var addressToReturn = _data.Customers.FirstOrDefault(c => c.Id == customerId).Addresses.FirstOrDefault(a => a.Id == addressId);
 
     }
 
     [HttpPost]
     public ActionResult<AddressDto> CreatAddress(int customerId, AddressForCreationDto addressForCreationDto){
 
-        var customerFromDatabase = Data.getInstance().Customers.FirstOrDefault(c => c.Id == customerId);
+        var customerFromDatabase = _data.Customers.FirstOrDefault(c => c.Id == customerId);
         if(customerFromDatabase == null){return NotFound();}
 
         var genUniqueAddrId = () => {
             int addrIdMax = 0;
 
-            foreach(Customer c in Data.getInstance().Customers){
+            foreach(Customer c in _data.Customers){
+                if(!c.Addresses.Any()){continue;}
                 int idMax = c.Addresses.Max(n => n.Id);
                 if(idMax > addrIdMax){addrIdMax = idMax;}
             }
@@ -74,7 +81,7 @@ public class AddressController : ControllerBase{
 
         return CreatedAtRoute(
             "GetAddressById",
-            new {customerId, addressId = addressToReturn.Id},
+            new {customerId = customerFromDatabase.Id, addressId = addressToReturn.Id},
             addressToReturn
         );
     }
@@ -83,7 +90,7 @@ public class AddressController : ControllerBase{
     public ActionResult UpdateCustomer(int customerId, int addressId, AddressForUpdateDto addressForUpdateDto){
         if(addressId != addressForUpdateDto.Id){return BadRequest();}
 
-        var customerFromDatabase = Data.getInstance().Customers.FirstOrDefault(c => c.Id == customerId);
+        var customerFromDatabase = _data.Customers.FirstOrDefault(c => c.Id == customerId);
         if(customerFromDatabase == null){return NotFound();}
 
         var rightAddressFromCustomer = customerFromDatabase.Addresses.FirstOrDefault(a => a.Id == addressId);
@@ -103,7 +110,7 @@ public class AddressController : ControllerBase{
 
     [HttpDelete("{addressId}")]
     public ActionResult DeleteAddress(int customerId, int addressId){
-        var customerFromDatabase = Data.getInstance().Customers.FirstOrDefault(c => c.Id == customerId);
+        var customerFromDatabase = _data.Customers.FirstOrDefault(c => c.Id == customerId);
         if(customerFromDatabase == null){return NotFound();}
 
         var addressFromCustomer = customerFromDatabase.Addresses.FirstOrDefault(a => a.Id == addressId);
