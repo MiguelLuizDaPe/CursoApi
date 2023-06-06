@@ -46,11 +46,12 @@ public class CustomersController : ControllerBase{
         //O n dentro da lambda é o objeto customer pq o FirstOrDefault() retorna elemento de mesma tipagem, por isso é possível interagi com o Id e compara-lo
         var customerFromDatabase = _data.Customers.FirstOrDefault(n => n.Id == id);
         if(customerFromDatabase == null){return NotFound();}
-        var customerForReturn = new CustomerDto{
-            Id = customerFromDatabase.Id,
-            Name = customerFromDatabase.Name, 
-            Cpf = customerFromDatabase.Cpf
-        };
+        var customerForReturn = _mapper.Map<CustomerDto>(customerFromDatabase);
+        // var customerForReturn = new CustomerDto{
+        //     Id = customerFromDatabase.Id,
+        //     Name = customerFromDatabase.Name, 
+        //     Cpf = customerFromDatabase.Cpf
+        // };
 
         return Ok(customerForReturn);
 
@@ -64,13 +65,15 @@ public class CustomersController : ControllerBase{
         //O n dentro da lambda é o objeto customer pq o FirstOrDefault() retorna elemento de mesma tipagem, por isso é possível interagi com o Id e compara-lo
         var customerFromDatabase = _data.Customers.FirstOrDefault(n => n.Cpf == cpf);
         if(customerFromDatabase == null){return NotFound();}
-        var dtoCustomer = new CustomerDto{
-            Id = customerFromDatabase.Id,
-            Name = customerFromDatabase.Name, 
-            Cpf = customerFromDatabase.Cpf
-        };
+        var customerForReturn = _mapper.Map<CustomerDto>(customerFromDatabase);
 
-        return Ok(dtoCustomer);
+        // var customerForReturn = new CustomerDto{
+        //     Id = customerFromDatabase.Id,
+        //     Name = customerFromDatabase.Name, 
+        //     Cpf = customerFromDatabase.Cpf
+        // };
+
+        return Ok(customerForReturn);
 
         //testa customer diferente de null, se for efetua a opção 1 se não efetua a segunda opção
         // return customer != null ? Ok(customer) : NotFound();
@@ -91,19 +94,24 @@ public class CustomersController : ControllerBase{
             return UnprocessableEntity(validationProblemDetails)/*que é um erro 422*/;
         }
 
-        var customerEntity = new Customer{
-            Id = _data.Customers.Max(n => n.Id) + 1, 
-            Name = customerForCreationDto.Name, 
-            Cpf = customerForCreationDto.Cpf
-        };
+        // var customerEntity = new Customer{
+        //     Id = _data.Customers.Max(n => n.Id) + 1, 
+        //     Name = customerForCreationDto.Name, 
+        //     Cpf = customerForCreationDto.Cpf
+        // };
 
+        // _data.Customers.Add(customerEntity);
+
+        // var customerForReturn = new CustomerDto{
+        //     Id = customerEntity.Id, 
+        //     Name = customerForCreationDto.Name, 
+        //     Cpf = customerForCreationDto.Cpf
+        // };
+
+        var customerEntity = _mapper.Map<Customer>(customerForCreationDto);
+        customerEntity.Id = _data.Customers.Max(n => n.Id) + 1;
         _data.Customers.Add(customerEntity);
-
-        var customerForReturn = new CustomerDto{
-            Id = customerEntity.Id, 
-            Name = customerForCreationDto.Name, 
-            Cpf = customerForCreationDto.Cpf
-        };
+        var customerForReturn = _mapper.Map<CustomerDto>(customerEntity);
 
 
         return CreatedAtRoute(
@@ -121,15 +129,15 @@ public class CustomersController : ControllerBase{
         var rightCustomer = _data.Customers.FirstOrDefault(n => n.Id == Id);
         if(rightCustomer == null){return NotFound();}
 
-        var updatedCustomer = new Customer(
-            customerForUpdateDto.Id,
-            customerForUpdateDto.Name,
-            customerForUpdateDto.Cpf
-        );
+        // var updatedCustomer = new Customer(
+        //     customerForUpdateDto.Id,
+        //     customerForUpdateDto.Name,
+        //     customerForUpdateDto.Cpf
+        // );
 
-        //_mapper.Map(customerForUpdateDto, rightCustomer)
-        rightCustomer.Name = customerForUpdateDto.Name;
-        rightCustomer.Cpf = customerForUpdateDto.Cpf;
+        _mapper.Map(customerForUpdateDto, rightCustomer);
+        // rightCustomer.Name = customerForUpdateDto.Name;
+        // rightCustomer.Cpf = customerForUpdateDto.Cpf;
     
         return NoContent();
     }
@@ -143,20 +151,25 @@ public class CustomersController : ControllerBase{
     }
 
     //quando possível pesquisar sobre isso (talvez)
-    [HttpPatch("{id}")]
-    public ActionResult PartiallyUpdateCustomer([FromBody] JsonPatchDocument<CustomerForPatchDto> patchDocument, [FromRoute] int id){
+    [HttpPatch("{id}")]//NÃO FUNCIONA E EU NÃO SEI ONDE TO ERRANDO
+    public ActionResult PartiallyUpdateCustomer([FromBody] JsonPatchDocument<CustomerForPatchDto> patchDocument, int id){
         var customerFromDatabase = _data.Customers.FirstOrDefault(n => n.Id == id);
         if(customerFromDatabase == null){return NotFound();}
 
-        var customerToPatch = new CustomerForPatchDto{
-            Name = customerFromDatabase.Name,
-            Cpf = customerFromDatabase.Cpf,
-        };
+        var customerToPatchDto = _mapper.Map<CustomerForPatchDto>(customerFromDatabase);
 
-        patchDocument.ApplyTo(customerToPatch);
+        // var customerToPatchDto = new CustomerForPatchDto{
+        //     Name = customerFromDatabase.Name,
+        //     Cpf = customerFromDatabase.Cpf,
+        // };
 
-        customerFromDatabase.Name = customerToPatch.Name;
-        customerFromDatabase.Cpf = customerToPatch.Cpf;
+        patchDocument.ApplyTo(customerToPatchDto);
+
+        _mapper.Map(customerToPatchDto, customerFromDatabase);
+
+
+        // customerFromDatabase.Name = customerToPatchDto.Name;
+        // customerFromDatabase.Cpf = customerToPatchDto.Cpf;
 
         return NoContent();
 
@@ -166,19 +179,22 @@ public class CustomersController : ControllerBase{
     public ActionResult<IEnumerable<CustomerWithAddressesDto>> GetCustomersWithAddresses(){
         
         var customersFromDatabase = _data.Customers;
-        var customersToReturn = customersFromDatabase.Select(customer => new CustomerWithAddressesDto{
-            Id = customer.Id,
-            Name = customer.Name,
-            Cpf = customer.Cpf,
-            Addresses = customer.Addresses.Select(address => new AddressDto{
-                Id = address.Id,
-                Street = address.Street,
-                City = address.City
-            }).ToList()
 
-        });
+       var customersForReturn = _mapper.Map<IEnumerable<CustomerWithAddressesDto>>(customersFromDatabase);
 
-        return Ok(customersToReturn); // O customerToReturn não precisa de .ToList() pq o Ok() serializa
+        // var customersToReturn = customersFromDatabase.Select(customer => new CustomerWithAddressesDto{
+        //     Id = customer.Id,
+        //     Name = customer.Name,
+        //     Cpf = customer.Cpf,
+        //     Addresses = customer.Addresses.Select(address => new AddressDto{
+        //         Id = address.Id,
+        //         Street = address.Street,
+        //         City = address.City
+        //     }).ToList()
+
+        // });
+
+        return Ok(customersForReturn); // O customerToReturn não precisa de .ToList() pq o Ok() serializa
     }
 
     [HttpGet("{id}/with-address", Name = "GetCustomerByIdWithAddresses")]
@@ -187,16 +203,18 @@ public class CustomersController : ControllerBase{
         var customerFromDatabase = _data.Customers.FirstOrDefault(n => n.Id == id);
         if(customerFromDatabase == null){return NotFound();}
 
-        var customerForReturn = new CustomerWithAddressesDto{
-            Id = customerFromDatabase.Id,
-            Name = customerFromDatabase.Name, 
-            Cpf = customerFromDatabase.Cpf,
-            Addresses = customerFromDatabase.Addresses.Select(a => new AddressDto{
-                Id = a.Id,
-                Street = a.Street,
-                City = a.City
-            }).ToList()
-        };
+        // var customerForReturn = new CustomerWithAddressesDto{
+        //     Id = customerFromDatabase.Id,
+        //     Name = customerFromDatabase.Name, 
+        //     Cpf = customerFromDatabase.Cpf,
+        //     Addresses = customerFromDatabase.Addresses.Select(a => new AddressDto{
+        //         Id = a.Id,
+        //         Street = a.Street,
+        //         City = a.City
+        //     }).ToList()
+        // };
+
+        var customerForReturn = _mapper.Map<CustomerWithAddressesDto>(customerFromDatabase);
 
         return Ok(customerForReturn);
     }
@@ -206,29 +224,37 @@ public class CustomersController : ControllerBase{
             // int n = 0;
             // int x = n++ + ++n;
         
-        var customerEntity = new Customer{
-            Id = _data.Customers.Max(n => n.Id) + 1,
-            Name = customerWithAddressesForCreationDto.Name,
-            Cpf = customerWithAddressesForCreationDto.Cpf,
-            Addresses = customerWithAddressesForCreationDto.Addresses.Select(a => new Address{
-                Id = genUniqueAddrId(), // Desse jeito não funciona para esse caso pois ele não tem acesso 
-                Street = a.Street,      //a ele mesmo para colocar um id diferente no próximo da lista
-                City = a.City
-            }).ToList()
-        };
+        // var customerEntity = new Customer{
+        //     Id = _data.Customers.Max(n => n.Id) + 1,
+        //     Name = customerWithAddressesForCreationDto.Name,
+        //     Cpf = customerWithAddressesForCreationDto.Cpf,
+        //     Addresses = customerWithAddressesForCreationDto.Addresses.Select(a => new Address{
+        //         Id = genUniqueAddrId(), // Desse jeito não funciona para esse caso pois ele não tem acesso 
+        //         Street = a.Street,      //a ele mesmo para colocar um id diferente no próximo da lista
+        //         City = a.City
+        //     }).ToList()
+        // };
 
+        // _data.Customers.Add(customerEntity);
+
+        // var customerForReturn = new CustomerWithAddressesDto{
+        //     Id = customerEntity.Id,
+        //     Name = customerWithAddressesForCreationDto.Name,
+        //     Cpf = customerWithAddressesForCreationDto.Cpf,
+        //     Addresses = customerEntity.Addresses.Select(a => new AddressDto{
+        //         Id = a.Id,
+        //         Street = a.Street,
+        //         City = a.City
+        //     }).ToList()
+        // };
+
+        var customerEntity = _mapper.Map<Customer>(customerWithAddressesForCreationDto);
+        customerEntity.Id = _data.Customers.Max(n => n.Id) + 1;
+        foreach(Address a in customerEntity.Addresses){
+            a.Id = genUniqueAddrId();
+        }
         _data.Customers.Add(customerEntity);
-
-        var customerForReturn = new CustomerWithAddressesDto{
-            Id = customerEntity.Id,
-            Name = customerWithAddressesForCreationDto.Name,
-            Cpf = customerWithAddressesForCreationDto.Cpf,
-            Addresses = customerEntity.Addresses.Select(a => new AddressDto{
-                Id = a.Id,
-                Street = a.Street,
-                City = a.City
-            }).ToList()
-        };
+        var customerForReturn = _mapper.Map<CustomerWithAddressesDto>(customerEntity);
 
         return CreatedAtRoute(
             "GetCustomerByIdWithAddresses",
@@ -242,22 +268,28 @@ public class CustomersController : ControllerBase{
         if(id != customerWithAddressesForUpdateDto.Id){ return BadRequest();}
 
         var rightCustomer = _data.Customers.FirstOrDefault(n => n.Id == id);
-        if(rightCustomer == null){ return BadRequest();}
+        if(rightCustomer == null){ return NotFound();}
 
-        var updatedCustomer = new Customer{
-            Id = customerWithAddressesForUpdateDto.Id,
-            Name = customerWithAddressesForUpdateDto.Name,
-            Cpf = customerWithAddressesForUpdateDto.Cpf,
-            Addresses = customerWithAddressesForUpdateDto.Addresses.Select(a => new Address{
-                Id = genUniqueAddrId(),
-                Street = a.Street,
-                City = a.City
-            }).ToList()
-        };
+        // var updatedCustomer = new Customer{
+        //     Id = customerWithAddressesForUpdateDto.Id,
+        //     Name = customerWithAddressesForUpdateDto.Name,
+        //     Cpf = customerWithAddressesForUpdateDto.Cpf,
+        //     Addresses = customerWithAddressesForUpdateDto.Addresses.Select(a => new Address{
+        //         Id = genUniqueAddrId(),
+        //         Street = a.Street,
+        //         City = a.City
+        //     }).ToList()
+        // };
 
-        rightCustomer.Name = updatedCustomer.Name;
-        rightCustomer.Cpf = updatedCustomer.Cpf;
-        rightCustomer.Addresses = updatedCustomer.Addresses;
+        // rightCustomer.Name = updatedCustomer.Name;
+        // rightCustomer.Cpf = updatedCustomer.Cpf;
+        // rightCustomer.Addresses = updatedCustomer.Addresses;
+
+        var updatedCustomer = _mapper.Map<Customer>(customerWithAddressesForUpdateDto);
+        foreach(Address a in updatedCustomer.Addresses){//isso é retardado e deve ter outro modo de fazer isso
+            a.Id = genUniqueAddrId();
+        }
+        _mapper.Map(updatedCustomer, rightCustomer);
 
         return NoContent();
 
