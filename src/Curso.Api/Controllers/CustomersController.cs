@@ -5,19 +5,24 @@ using Curso.Api.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Options;
+using Curso.Api.DbContexts;
 
 namespace Curso.Api.Controllers;
 
 [ApiController]
 [Route("api/customers")]
-public class CustomersController : ControllerBase{
+public class CustomersController : MainController{
 
     private readonly Data _data;
     private readonly IMapper _mapper;
+    private readonly CustomerContext _context;
 
-    public CustomersController(Data data, IMapper mapper){//essa porra é uma injeção de dependência
+    public CustomersController(Data data, IMapper mapper, CustomerContext context){//essa porra é uma injeção de dependência
         _data = data ?? throw new ArgumentNullException(nameof(data));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
     private int addrIdMax = 0;
@@ -35,7 +40,7 @@ public class CustomersController : ControllerBase{
 
     [HttpGet]
     public ActionResult<IEnumerable<CustomerDto>> GetCustomers(){
-       var customersFromDatabase = _data.Customers;
+       var customersFromDatabase = _context.Customers.OrderBy(c => c.Name).ToList();//obrigado se não o bando de dados não é executado
        var customersForReturn = _mapper.Map<IEnumerable<CustomerDto>>(customersFromDatabase);
 
        return Ok(customersForReturn);
@@ -44,7 +49,7 @@ public class CustomersController : ControllerBase{
     [HttpGet("{id}", Name = "GetCustomerById")]
     public ActionResult<CustomerDto> GetCustomerById(int id){
         //O n dentro da lambda é o objeto customer pq o FirstOrDefault() retorna elemento de mesma tipagem, por isso é possível interagi com o Id e compara-lo
-        var customerFromDatabase = _data.Customers.FirstOrDefault(n => n.Id == id);
+        var customerFromDatabase = _context.Customers.FirstOrDefault(n => n.Id == id);//metodos de agregação não precisam de ToList(), como o FirstOrDefault()
         if(customerFromDatabase == null){return NotFound();}
         var customerForReturn = _mapper.Map<CustomerDto>(customerFromDatabase);
         // var customerForReturn = new CustomerDto{
@@ -83,17 +88,6 @@ public class CustomersController : ControllerBase{
     [HttpPost]
     public ActionResult<CustomerDto> CreateCustomer(CustomerForCreationDto customerForCreationDto){
 
-        if(!ModelState.IsValid){
-            //Cria a fábrica de um objeto de detalhes de um problema de validação
-            var problemDetailsFactory = HttpContext.RequestServices.GetRequiredService<ProblemDetailsFactory>();
-            //Cria um objeto de detalhes de um problema de validação
-            var validationProblemDetails = problemDetailsFactory.CreateValidationProblemDetails(HttpContext, ModelState);
-            //Aribui o statis code 422 no corpo do response
-            validationProblemDetails.Status = StatusCodes.Status422UnprocessableEntity;
-
-            return UnprocessableEntity(validationProblemDetails)/*que é um erro 422*/;
-        }
-
         // var customerEntity = new Customer{
         //     Id = _data.Customers.Max(n => n.Id) + 1, 
         //     Name = customerForCreationDto.Name, 
@@ -109,8 +103,9 @@ public class CustomersController : ControllerBase{
         // };
 
         var customerEntity = _mapper.Map<Customer>(customerForCreationDto);
-        customerEntity.Id = _data.Customers.Max(n => n.Id) + 1;
-        _data.Customers.Add(customerEntity);
+        // customerEntity.Id = _data.Customers.Max(n => n.Id) + 1;
+        _context.Customers.Add(customerEntity);
+        _context.SaveChanges();
         var customerForReturn = _mapper.Map<CustomerDto>(customerEntity);
 
 
@@ -152,24 +147,26 @@ public class CustomersController : ControllerBase{
 
     //quando possível pesquisar sobre isso (talvez)
     [HttpPatch("{id}")]//NÃO FUNCIONA E EU NÃO SEI ONDE TO ERRANDO
-    public ActionResult PartiallyUpdateCustomer([FromBody] JsonPatchDocument<CustomerForPatchDto> patchDocument, int id){
+    public ActionResult PartiallyUpdateCustomer(JsonPatchDocument<CustomerForPatchDto> patchDocument, int id){
         var customerFromDatabase = _data.Customers.FirstOrDefault(n => n.Id == id);
         if(customerFromDatabase == null){return NotFound();}
 
-        var customerToPatchDto = _mapper.Map<CustomerForPatchDto>(customerFromDatabase);
+        var customerToPatchDto = new CustomerForPatchDto{
+            Name = customerFromDatabase.Name,
+            Cpf = customerFromDatabase.Cpf,
+        };
 
-        // var customerToPatchDto = new CustomerForPatchDto{
-        //     Name = customerFromDatabase.Name,
-        //     Cpf = customerFromDatabase.Cpf,
-        // };
+        patchDocument.ApplyTo(customerToPatchDto, ModelState);
 
-        patchDocument.ApplyTo(customerToPatchDto);
+        if(!TryValidateModel(customerToPatchDto)){
+            return ValidationProblem(ModelState);
+        }
 
-        _mapper.Map(customerToPatchDto, customerFromDatabase);
+        customerFromDatabase.Name = customerToPatchDto.Name;
+        customerFromDatabase.Cpf = customerToPatchDto.Cpf;
 
-
-        // customerFromDatabase.Name = customerToPatchDto.Name;
-        // customerFromDatabase.Cpf = customerToPatchDto.Cpf;
+        // var customerToPatchDto = _mapper.Map<CustomerForPatchDto>(customerFromDatabase);
+        // _mapper.Map(customerToPatchDto, customerFromDatabase);
 
         return NoContent();
 

@@ -4,10 +4,13 @@
  - Microsoft.AspNetCore.JsonPatch
  - Microsoft.AspNetCore.Mvc.NewtonsoftJson
  - "dotnet tool install --global dotnet-ef" pra ver depois isso
+ - "dotnet ef migrations add InitialMigration" pra criar a migração
+ - "dotnet ef database update" da o update na base de dados
 
 # Anotações
  - Estudar sobre os bagulho de 200, 400 de BadRequest e os caralho
  - usar o SelecMany pra pegar os endereços pelo id(eu acho)
+ - da uma olhada no "decimal"
 ## Regras de validação
  - ModelState contem o estado e validação do modelo e uma coleção de mensagens(eu acho) de erros
  - tools.ietf.org/html/rfc7807 contem detalhes do problema para APIs (não sem se vale muito apena ler)
