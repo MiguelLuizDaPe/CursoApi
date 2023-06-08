@@ -1,7 +1,9 @@
 using AutoMapper;
+using Curso.Api.DbContexts;
 using Curso.Api.Entities;
 using Curso.Api.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Curso.Api.Controllers;
 
@@ -9,32 +11,34 @@ namespace Curso.Api.Controllers;
 [Route("api/customers/{customerId}/addresses")]
 public class AddressesController : MainController{
 
-    private readonly Data _data;
+    // private readonly Data _data;
     private readonly IMapper _mapper;
+    private readonly CustomerContext _context;
 
 
-    public AddressesController(Data data, IMapper mapper){//essa porra é uma injeção de dependência
-        _data = data ?? throw new ArgumentNullException(nameof(data));
+    public AddressesController(/*Data data,*/ IMapper mapper, CustomerContext context){//essa porra é uma injeção de dependência
+        // _data = data ?? throw new ArgumentNullException(nameof(data));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
-    private int addrIdMax = 0;
-    private int genUniqueAddrId(){
-        if(addrIdMax == 0){
-            foreach(Customer c in _data.Customers){
-                if(!c.Addresses.Any()){continue;}
-                int idMax = c.Addresses.Max(n => n.Id);
-                if(idMax > addrIdMax){addrIdMax = idMax;}
-            }
-        }
-        addrIdMax += 1;
-        return addrIdMax;
-    }
+    // private int addrIdMax = 0;
+    // private int genUniqueAddrId(){
+    //     if(addrIdMax == 0){
+    //         foreach(Customer c in _data.Customers){
+    //             if(!c.Addresses.Any()){continue;}
+    //             int idMax = c.Addresses.Max(n => n.Id);
+    //             if(idMax > addrIdMax){addrIdMax = idMax;}
+    //         }
+    //     }
+    //     addrIdMax += 1;
+    //     return addrIdMax;
+    // }
 
 
     [HttpGet] //copiar essa porra de alguém depois também
     public ActionResult<IEnumerable<AddressDto>> GetAdressesFromCustomer(int customerId){
-        var customerFromDatabase = _data.Customers.FirstOrDefault(customer => customer.Id == customerId);
+        var customerFromDatabase = _context.Customers.Include(c => c.Addresses).FirstOrDefault(customer => customer.Id == customerId);
         if (customerFromDatabase == null){ return NotFound();}
 
         var addressesToReturn = _mapper.Map<IEnumerable<AddressDto>>(customerFromDatabase.Addresses);
@@ -48,7 +52,7 @@ public class AddressesController : MainController{
 
     [HttpGet("{addressId}", Name = "GetAddressById")]
     public ActionResult<AddressDto> GetAddressFromCustomer( int customerId, int addressId){
-        var customerFromDatabase = _data.Customers.FirstOrDefault(c => c.Id == customerId);
+        var customerFromDatabase = _context.Customers.Include(c => c.Addresses).FirstOrDefault(c => c.Id == customerId);
         if(customerFromDatabase == null){return NotFound();}
 
         var addressFromCustomer = customerFromDatabase.Addresses.FirstOrDefault(a => a.Id == addressId);
@@ -67,7 +71,7 @@ public class AddressesController : MainController{
     [HttpPost]
     public ActionResult<AddressDto> CreatAddress(int customerId, AddressForCreationDto addressForCreationDto){
 
-        var customerFromDatabase = _data.Customers.FirstOrDefault(c => c.Id == customerId);
+        var customerFromDatabase = _context.Customers.Include(c => c.Addresses).FirstOrDefault(c => c.Id == customerId);
         if(customerFromDatabase == null){return NotFound();}
 
         // var addressEntity = new Address{
@@ -85,8 +89,9 @@ public class AddressesController : MainController{
         // };
 
         var addressEntity = _mapper.Map<Address>(addressForCreationDto);
-        addressEntity.Id = genUniqueAddrId();
+        // addressEntity.Id = genUniqueAddrId();
         customerFromDatabase.Addresses.Add(addressEntity);
+        _context.SaveChanges();
         var addressToReturn = _mapper.Map<AddressDto>(addressEntity);
 
         return CreatedAtRoute(
@@ -100,7 +105,7 @@ public class AddressesController : MainController{
     public ActionResult UpdateCustomer(int customerId, int addressId, AddressForUpdateDto addressForUpdateDto){
         if(addressId != addressForUpdateDto.Id){return BadRequest();}
 
-        var customerFromDatabase = _data.Customers.FirstOrDefault(c => c.Id == customerId);
+        var customerFromDatabase = _context.Customers.Include(c => c.Addresses).FirstOrDefault(c => c.Id == customerId);
         if(customerFromDatabase == null){return NotFound();}
 
         var rightAddressFromCustomer = customerFromDatabase.Addresses.FirstOrDefault(a => a.Id == addressId);
@@ -116,19 +121,22 @@ public class AddressesController : MainController{
         // rightAddressFromCustomer.City = updatedAddress.City;
 
         _mapper.Map(addressForUpdateDto, rightAddressFromCustomer);
+        _context.SaveChanges();
 
         return NoContent();
     }
 
     [HttpDelete("{addressId}")]
     public ActionResult DeleteAddress(int customerId, int addressId){
-        var customerFromDatabase = _data.Customers.FirstOrDefault(c => c.Id == customerId);
+        var customerFromDatabase = _context.Customers.Include(c => c.Addresses).FirstOrDefault(c => c.Id == customerId);
         if(customerFromDatabase == null){return NotFound();}
 
         var addressFromCustomer = customerFromDatabase.Addresses.FirstOrDefault(a => a.Id == addressId);
         if(addressFromCustomer == null){return NotFound();}
 
         customerFromDatabase.Addresses.Remove(addressFromCustomer);
+        _context.SaveChanges();
+
         return NoContent();
 
     }

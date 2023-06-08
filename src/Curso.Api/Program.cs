@@ -15,7 +15,7 @@ builder.WebHost.ConfigureKestrel(options => {
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());//injetamo o auto mapper (eu acho, não entendi onde o bagulho ta injetando)
 builder.Services.AddSingleton<Data>();//injetamo o Data como singleton (eu acho, não entendi onde o bagulho ta injetando)
 
-builder.Services.AddDbContext<CustomerContext>(options => options.UseNpgsql("Host=localhost;Database=Univali;Username=postgres;Password=123456"));
+builder.Services.AddDbContext<CustomerContext>(options => options.UseNpgsql("Host=localhost;Database=Curso;Username=miguel;Password=123456"));//pro curso o username é postgres
 
 // Add services to the container.
 //aqui foi configurado pra transformar em .json(eu acho)

@@ -9,6 +9,7 @@ public class CustomerProfile : Profile{
         CreateMap<Models.CustomerForCreationDto, Entities.Customer>();
         CreateMap<Models.CustomerForUpdateDto, Entities.Customer>();
         CreateMap<Models.CustomerForPatchDto, Entities.Customer>();
+        CreateMap<Entities.Customer, Models.CustomerForPatchDto>();
         CreateMap<Entities.Customer, Models.CustomerWithAddressesDto>();
         CreateMap<Models.CustomerWithAddressesForCreationDto, Entities.Customer>();
         CreateMap<Models.CustomerWithAddressesForUpdateDto, Entities.Customer>();
