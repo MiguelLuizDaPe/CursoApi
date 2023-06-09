@@ -2,6 +2,7 @@ using Curso.Api;
 using Curso.Api.Configuration;
 using Curso.Api.DbContexts;
 using Curso.Api.Extensions;
+using Curso.Api.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -14,8 +15,9 @@ builder.WebHost.ConfigureKestrel(options => {
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());//injetamo o auto mapper (eu acho, não entendi onde o bagulho ta injetando)
 builder.Services.AddSingleton<Data>();//injetamo o Data como singleton (eu acho, não entendi onde o bagulho ta injetando)
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 
-builder.Services.AddDbContext<CustomerContext>(options => options.UseNpgsql("Host=localhost;Database=Curso;Username=miguel;Password=123456"));//pro curso o username é postgres
+builder.Services.AddDbContext<CustomerContext>(options => options.UseNpgsql("Host=localhost;Database=Curso;Username=postgres;Password=123456"));//pro curso o username é postgres e em casa é miguel
 
 // Add services to the container.
 //aqui foi configurado pra transformar em .json(eu acho)

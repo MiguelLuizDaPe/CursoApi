@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
 using Curso.Api.DbContexts;
 using Microsoft.EntityFrameworkCore;
+using Curso.Api.Repositories;
 
 namespace Curso.Api.Controllers;
 
@@ -19,11 +20,13 @@ public class CustomersController : MainController{
     // private readonly Data _data;
     private readonly IMapper _mapper;
     private readonly CustomerContext _context;
+    private readonly ICustomerRepository _customerRepository;
 
-    public CustomersController(/*Data data, */IMapper mapper, CustomerContext context){//essa porra é uma injeção de dependência
+    public CustomersController(/*Data data, */IMapper mapper, CustomerContext context, ICustomerRepository customerRepository){//essa porra é uma injeção de dependência
         // _data = data ?? throw new ArgumentNullException(nameof(data));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _context = context ?? throw new ArgumentNullException(nameof(context));
+        _customerRepository = customerRepository ?? throw new ArgumentNullException(nameof(customerRepository));
     }
 
     // private int addrIdMax = 0;
@@ -40,17 +43,17 @@ public class CustomersController : MainController{
     // }
 
     [HttpGet]
-    public ActionResult<IEnumerable<CustomerDto>> GetCustomers(){
-       var customersFromDatabase = _context.Customers.OrderBy(c => c.Name).ToList();//obrigado se não o bando de dados não é executado
+    public async Task<ActionResult<IEnumerable<CustomerDto>>> GetCustomers(){
+       var customersFromDatabase = await _customerRepository.GetCustomersAsync();//callback hell da uma pesquisadinha depois
        var customersForReturn = _mapper.Map<IEnumerable<CustomerDto>>(customersFromDatabase);
 
        return Ok(customersForReturn);
     }
 
-    [HttpGet("{id}", Name = "GetCustomerById")]
-    public ActionResult<CustomerDto> GetCustomerById(int id){
+    [HttpGet("{customerId}", Name = "GetCustomerById")]
+    public ActionResult<CustomerDto> GetCustomerById(int customerId){
         //O n dentro da lambda é o objeto customer pq o FirstOrDefault() retorna elemento de mesma tipagem, por isso é possível interagi com o Id e compara-lo
-        var customerFromDatabase = _context.Customers.FirstOrDefault(n => n.Id == id);//metodos de agregação não precisam de ToList(), como o FirstOrDefault()
+        var customerFromDatabase = _customerRepository.GetCustomerById(customerId);//metodos de agregação não precisam de ToList(), como o FirstOrDefault()
         if(customerFromDatabase == null){return NotFound();}
         var customerForReturn = _mapper.Map<CustomerDto>(customerFromDatabase);
         // var customerForReturn = new CustomerDto{
@@ -271,7 +274,8 @@ public class CustomersController : MainController{
     public ActionResult UpdateCustomerWithAddresses(int id, CustomerWithAddressesForUpdateDto customerWithAddressesForUpdateDto){
         if(id != customerWithAddressesForUpdateDto.Id){ return BadRequest();}
 
-        var rightCustomer = _context.Customers.Include(c => c.Addresses).FirstOrDefault(n => n.Id == id);
+        var rightCustomer = _context.Customers.FirstOrDefault(n => n.Id == id);//teste/////////
+        // var rightCustomer = _context.Customers.Include(c => c.Addresses).FirstOrDefault(n => n.Id == id);//o que "funciona"////////
         if(rightCustomer == null){ return NotFound();}
 
         // var updatedCustomer = new Customer{
@@ -285,16 +289,27 @@ public class CustomersController : MainController{
         //     }).ToList()
         // };
 
+        _mapper.Map(customerWithAddressesForUpdateDto, rightCustomer);//teste/////
+
+        rightCustomer.Addresses = customerWithAddressesForUpdateDto.Addresses.Select(a => _mapper.Map<Address>(a)).ToList();//teste//talvez deixe como final(ficou legal)////
+
+
         // rightCustomer.Name = updatedCustomer.Name;
         // rightCustomer.Cpf = updatedCustomer.Cpf;
         // rightCustomer.Addresses = updatedCustomer.Addresses;
 
-        var updatedCustomer = _mapper.Map<Customer>(customerWithAddressesForUpdateDto);
+        // var updatedCustomer = _mapper.Map<Customer>(customerWithAddressesForUpdateDto);//o que "funciona"////////
+
+
         // foreach(Address a in updatedCustomer.Addresses){//isso é retardado e deve ter outro modo de fazer isso
         //     a.Id = genUniqueAddrId();
         // }
-        _mapper.Map(updatedCustomer, rightCustomer);
+
+
+        // _mapper.Map(updatedCustomer, rightCustomer);//o feito que "funciona"//////
         _context.SaveChanges();
+
+
 
         return NoContent();
 
