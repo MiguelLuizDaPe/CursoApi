@@ -19,7 +19,7 @@ public class CustomersController : MainController{
 
     // private readonly Data _data;
     private readonly IMapper _mapper;
-    private readonly CustomerContext _context;
+    // private readonly CustomerContext _context;
     private readonly ICustomerRepository _customerRepository;
 
     public CustomersController(/*Data data, */IMapper mapper, CustomerContext context, ICustomerRepository customerRepository){//essa porra é uma injeção de dependência
@@ -69,10 +69,10 @@ public class CustomersController : MainController{
 
     }
 
-    [HttpGet("cpf/{cpf}")]
-    public ActionResult<CustomerDto> GetCustomerCpf(string cpf){
+    [HttpGet("cpf/{customerCpf}")]
+    public ActionResult<CustomerDto> GetCustomerCpf(string customerCpf){
         //O n dentro da lambda é o objeto customer pq o FirstOrDefault() retorna elemento de mesma tipagem, por isso é possível interagi com o Id e compara-lo
-        var customerFromDatabase = _context.Customers.FirstOrDefault(n => n.Cpf == cpf);
+        var customerFromDatabase = _customerRepository.GetCustomerByCpf(customerCpf);
         if(customerFromDatabase == null){return NotFound();}
         var customerForReturn = _mapper.Map<CustomerDto>(customerFromDatabase);
 
@@ -108,8 +108,8 @@ public class CustomersController : MainController{
 
         var customerEntity = _mapper.Map<Customer>(customerForCreationDto);
         // customerEntity.Id = _data.Customers.Max(n => n.Id) + 1;
-        _context.Customers.Add(customerEntity);
-        _context.SaveChanges();
+        _customerRepository.AddCustomer(customerEntity);
+        _customerRepository.SaveChanges();
         var customerForReturn = _mapper.Map<CustomerDto>(customerEntity);
 
 
@@ -120,12 +120,12 @@ public class CustomersController : MainController{
         );
     }
 
-    [HttpPut("{id}")]
-    public ActionResult UpdateCustomer(int Id, CustomerForUpdateDto customerForUpdateDto){
+    [HttpPut("{customerId}")]
+    public ActionResult UpdateCustomer(int customerId, CustomerForUpdateDto customerForUpdateDto){
         //verificação de Id pq pode acontecer um ataque malicioso com intenções maléficas de pura maldade
-        if(Id != customerForUpdateDto.Id){return BadRequest();}
+        if(customerId != customerForUpdateDto.Id){return BadRequest();}
 
-        var rightCustomer = _context.Customers.FirstOrDefault(n => n.Id == Id);
+        var rightCustomer = _customerRepository.GetCustomerById(customerId);
         if(rightCustomer == null){return NotFound();}
 
         // var updatedCustomer = new Customer(
@@ -135,7 +135,7 @@ public class CustomersController : MainController{
         // );
 
         _mapper.Map(customerForUpdateDto, rightCustomer);
-        _context.SaveChanges();
+        _customerRepository.SaveChanges();
 
         // rightCustomer.Name = customerForUpdateDto.Name;
         // rightCustomer.Cpf = customerForUpdateDto.Cpf;
@@ -143,19 +143,19 @@ public class CustomersController : MainController{
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
-    public ActionResult<CustomerDto> DeleteCustomer(int id){
-        var customer = _context.Customers.FirstOrDefault(n => n.Id == id);
+    [HttpDelete("{customerId}")]
+    public ActionResult<CustomerDto> DeleteCustomer(int customerId){
+        var customer = _customerRepository.GetCustomerById(customerId);
         if(customer == null){return NotFound();}
-        _context.Customers.Remove(customer);
-        _context.SaveChanges();
+        _customerRepository.RemoveCustomer(customer);
+        _customerRepository.SaveChanges();
         return NoContent();
     }
 
     //quando possível pesquisar sobre isso (talvez)
-    [HttpPatch("{id}")]
-    public ActionResult PartiallyUpdateCustomer([FromBody]JsonPatchDocument<CustomerForPatchDto> patchDocument, [FromRoute] int id){
-        var customerFromDatabase = _context.Customers.FirstOrDefault(n => n.Id == id);
+    [HttpPatch("{customerId}")]
+    public ActionResult PartiallyUpdateCustomer(JsonPatchDocument<CustomerForPatchDto> patchDocument, int customerId){
+        var customerFromDatabase = _customerRepository.GetCustomerById(customerId);
         if(customerFromDatabase == null){return NotFound();}
 
         // var customerToPatchDto = new CustomerForPatchDto{
@@ -175,7 +175,7 @@ public class CustomersController : MainController{
         // customerFromDatabase.Cpf = customerToPatchDto.Cpf;
 
         _mapper.Map(customerToPatchDto, customerFromDatabase);
-        _context.SaveChanges();
+        _customerRepository.SaveChanges();
 
         return NoContent();
 

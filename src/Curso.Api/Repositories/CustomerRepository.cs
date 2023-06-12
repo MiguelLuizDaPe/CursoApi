@@ -11,13 +11,34 @@ public class CustomerRepository : ICustomerRepository{
         _context = customerContext;
     }
 
+    public async Task<IEnumerable<Customer>> GetCustomersAsync()
+    {
+        return await _context.Customers.OrderBy(c => c.Id).ToListAsync();
+    }
+
     public Customer? GetCustomerById(int customerId)
     {
         return _context.Customers.FirstOrDefault(n => n.Id == customerId);
     }
 
-    public async Task<IEnumerable<Customer>> GetCustomersAsync()
+    public Customer? GetCustomerByCpf(string customerCpf)
     {
-        return await _context.Customers.OrderBy(c => c.Name).ToListAsync();
+        return _context.Customers.FirstOrDefault(n => n.Cpf == customerCpf);
+    }
+
+    public void AddCustomer(Customer customerEntity)
+    {
+        _context.Customers.Add(customerEntity);
+    }
+
+    public void SaveChanges()
+    {
+        _context.SaveChanges();
+
+    }
+
+    public void RemoveCustomer(Customer customer)
+    {
+        _context.Customers.Remove(customer);
     }
 }
