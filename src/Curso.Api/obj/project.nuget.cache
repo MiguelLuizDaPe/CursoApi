@@ -1,12 +1,14 @@
 {
   "version": 2,
-  "dgSpecHash": "/2IS51JAeknZFGHuOodKThpZYXmhndhhQb3pJJKh8NXpiZBbG71r0IHDJKlSSPwI4SZver4Wua28wl/lPg0IJg==",
+  "dgSpecHash": "NCiRlj856M0LAl6xmJs2azjRfLymTpVS+MM9pnFx1SKYs6YxczB1ujYgZ6nwyIrGHoiBPerdOSj9QTZ2mpKoxQ==",
   "success": true,
   "projectFilePath": "/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/Curso.Api.csproj",
   "expectedPackageFiles": [
     "/home/miguel/.nuget/packages/automapper/12.0.1/automapper.12.0.1.nupkg.sha512",
     "/home/miguel/.nuget/packages/automapper.extensions.microsoft.dependencyinjection/12.0.1/automapper.extensions.microsoft.dependencyinjection.12.0.1.nupkg.sha512",
     "/home/miguel/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
+    "/home/miguel/.nuget/packages/mediatr/12.0.1/mediatr.12.0.1.nupkg.sha512",
+    "/home/miguel/.nuget/packages/mediatr.contracts/2.0.1/mediatr.contracts.2.0.1.nupkg.sha512",
     "/home/miguel/.nuget/packages/microsoft.aspnetcore.jsonpatch/7.0.5/microsoft.aspnetcore.jsonpatch.7.0.5.nupkg.sha512",
     "/home/miguel/.nuget/packages/microsoft.aspnetcore.mvc.newtonsoftjson/7.0.5/microsoft.aspnetcore.mvc.newtonsoftjson.7.0.5.nupkg.sha512",
     "/home/miguel/.nuget/packages/microsoft.aspnetcore.openapi/7.0.5/microsoft.aspnetcore.openapi.7.0.5.nupkg.sha512",

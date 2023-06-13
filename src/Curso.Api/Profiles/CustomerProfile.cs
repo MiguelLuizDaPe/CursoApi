@@ -1,4 +1,8 @@
 using AutoMapper;
+using Curso.Api.Entities;
+using Curso.Api.Features.Customers.Queries.GetCustomerByCpf;
+using Curso.Api.Features.Customers.Queries.GetCustomerDetail;
+using Curso.Api.Features.Customers.Queries.GetCustomerWithAddress;
 
 namespace Curso.Api.Profiles;
 
@@ -14,6 +18,11 @@ public class CustomerProfile : Profile{
         CreateMap<Models.CustomerWithAddressesForCreationDto, Entities.Customer>();
         CreateMap<Models.CustomerWithAddressesForUpdateDto, Entities.Customer>();
         CreateMap<Entities.Customer, Entities.Customer>();
+
+        //novos
+        CreateMap<Customer, GetCustomerDetailDto>();
+        CreateMap<Customer, GetCustomerByCpfDto>();
+        CreateMap<Customer, GetCustomerWithAddressDto>();
         
     }
 }

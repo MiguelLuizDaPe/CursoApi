@@ -17,6 +17,8 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());//injeta
 builder.Services.AddSingleton<Data>();//injetamo o Data como singleton (eu acho, não entendi onde o bagulho ta injetando)
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
+
 builder.Services.AddDbContext<CustomerContext>(options => options.UseNpgsql("Host=localhost;Database=Curso;Username=miguel;Password=123456"));//pro curso o username é postgres e em casa é miguel
 
 // Add services to the container.

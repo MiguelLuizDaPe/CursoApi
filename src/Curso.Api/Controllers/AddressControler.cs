@@ -2,6 +2,7 @@ using AutoMapper;
 using Curso.Api.DbContexts;
 using Curso.Api.Entities;
 using Curso.Api.Models;
+using Curso.Api.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,13 +14,14 @@ public class AddressesController : MainController{
 
     // private readonly Data _data;
     private readonly IMapper _mapper;
-    private readonly CustomerContext _context;
+    // private readonly CustomerContext _context;
+    private readonly ICustomerRepository _customerRepository;
 
-
-    public AddressesController(/*Data data,*/ IMapper mapper, CustomerContext context){//essa porra é uma injeção de dependência
+    public AddressesController(/*Data data,*/ IMapper mapper, CustomerContext context, ICustomerRepository customerRepository){//essa porra é uma injeção de dependência
         // _data = data ?? throw new ArgumentNullException(nameof(data));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _context = context ?? throw new ArgumentNullException(nameof(context));
+        // _context = context ?? throw new ArgumentNullException(nameof(context));
+        _customerRepository = customerRepository ?? throw new ArgumentNullException(nameof(customerRepository));
     }
 
     // private int addrIdMax = 0;
@@ -37,22 +39,18 @@ public class AddressesController : MainController{
 
 
     [HttpGet] //copiar essa porra de alguém depois também
-    public ActionResult<IEnumerable<AddressDto>> GetAdressesFromCustomer(int customerId){
-        var customerFromDatabase = _context.Customers.Include(c => c.Addresses).FirstOrDefault(customer => customer.Id == customerId);
+    public async Task<ActionResult<IEnumerable<AddressDto>>> GetAdressesFromCustomer(int customerId){
+        var customerFromDatabase = await _customerRepository.GetCustomerWithAddressesAsync(customerId);
         if (customerFromDatabase == null){ return NotFound();}
 
         var addressesToReturn = _mapper.Map<IEnumerable<AddressDto>>(customerFromDatabase.Addresses);
-
-        // var addressesToReturn = customerFromDatabase.Addresses.Select(
-        //     a => new AddressDto{Id = a.Id, Street = a.Street, City = a.City}
-        // );
 
         return Ok(addressesToReturn);
     }
 
     [HttpGet("{addressId}", Name = "GetAddressById")]
-    public ActionResult<AddressDto> GetAddressFromCustomer( int customerId, int addressId){
-        var customerFromDatabase = _context.Customers.Include(c => c.Addresses).FirstOrDefault(c => c.Id == customerId);
+    public async Task<ActionResult<AddressDto>> GetAddressFromCustomer( int customerId, int addressId){
+        var customerFromDatabase = await _customerRepository.GetCustomerWithAddressesAsync(customerId);
         if(customerFromDatabase == null){return NotFound();}
 
         var addressFromCustomer = customerFromDatabase.Addresses.FirstOrDefault(a => a.Id == addressId);
@@ -69,29 +67,15 @@ public class AddressesController : MainController{
     }
 
     [HttpPost]
-    public ActionResult<AddressDto> CreatAddress(int customerId, AddressForCreationDto addressForCreationDto){
+    public async Task<ActionResult<AddressDto>> CreatAddress(int customerId, AddressForCreationDto addressForCreationDto){
 
-        var customerFromDatabase = _context.Customers.Include(c => c.Addresses).FirstOrDefault(c => c.Id == customerId);
+        var customerFromDatabase = await _customerRepository.GetCustomerWithAddressesAsync(customerId);
         if(customerFromDatabase == null){return NotFound();}
-
-        // var addressEntity = new Address{
-        //     Id = genUniqueAddrId(),
-        //     Street = addressForCreationDto.Street,
-        //     City = addressForCreationDto.City
-        // };
-
-        // customerFromDatabase.Addresses.Add(addressEntity);
-
-        // var addressToReturn = new AddressDto{
-        //     Id = addressEntity.Id,
-        //     Street = addressForCreationDto.Street,
-        //     City = addressForCreationDto.City
-        // };
 
         var addressEntity = _mapper.Map<Address>(addressForCreationDto);
         // addressEntity.Id = genUniqueAddrId();
         customerFromDatabase.Addresses.Add(addressEntity);
-        _context.SaveChanges();
+        _customerRepository.SaveChanges();
         var addressToReturn = _mapper.Map<AddressDto>(addressEntity);
 
         return CreatedAtRoute(
@@ -102,40 +86,31 @@ public class AddressesController : MainController{
     }
 
     [HttpPut("{addressId}")]
-    public ActionResult UpdateCustomer(int customerId, int addressId, AddressForUpdateDto addressForUpdateDto){
+    public async Task<ActionResult> UpdateCustomer(int customerId, int addressId, AddressForUpdateDto addressForUpdateDto){
         if(addressId != addressForUpdateDto.Id){return BadRequest();}
 
-        var customerFromDatabase = _context.Customers.Include(c => c.Addresses).FirstOrDefault(c => c.Id == customerId);
+        var customerFromDatabase = await _customerRepository.GetCustomerWithAddressesAsync(customerId);
         if(customerFromDatabase == null){return NotFound();}
 
         var rightAddressFromCustomer = customerFromDatabase.Addresses.FirstOrDefault(a => a.Id == addressId);
         if(rightAddressFromCustomer == null){return NotFound();}
 
-        // var updatedAddress = new Address{
-        //     Id = addressForUpdateDto.Id,
-        //     Street = addressForUpdateDto.Street,
-        //     City = addressForUpdateDto.City
-        // };
-
-        // rightAddressFromCustomer.Street = updatedAddress.Street;
-        // rightAddressFromCustomer.City = updatedAddress.City;
-
         _mapper.Map(addressForUpdateDto, rightAddressFromCustomer);
-        _context.SaveChanges();
+        _customerRepository.SaveChanges();
 
         return NoContent();
     }
 
     [HttpDelete("{addressId}")]
-    public ActionResult DeleteAddress(int customerId, int addressId){
-        var customerFromDatabase = _context.Customers.Include(c => c.Addresses).FirstOrDefault(c => c.Id == customerId);
+    public async Task<ActionResult> DeleteAddress(int customerId, int addressId){
+        var customerFromDatabase = await _customerRepository.GetCustomerWithAddressesAsync(customerId);
         if(customerFromDatabase == null){return NotFound();}
 
         var addressFromCustomer = customerFromDatabase.Addresses.FirstOrDefault(a => a.Id == addressId);
         if(addressFromCustomer == null){return NotFound();}
 
         customerFromDatabase.Addresses.Remove(addressFromCustomer);
-        _context.SaveChanges();
+        _customerRepository.SaveChanges();
 
         return NoContent();
 
