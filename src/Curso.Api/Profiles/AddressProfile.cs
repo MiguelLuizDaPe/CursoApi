@@ -2,8 +2,10 @@ using AutoMapper;
 using Curso.Api.Entities;
 using Curso.Api.Features.Addresses.Command.CreateAddressOfCustomer;
 using Curso.Api.Features.Addresses.Command.RemoveAddressOfCustomer;
+using Curso.Api.Features.Addresses.Command.UpdateAddressOfCustomer;
 using Curso.Api.Features.Addresses.Queries.GetAddressesOfCustomer;
 using Curso.Api.Features.Addresses.Queries.GetAddressOfCustomer;
+using Curso.Api.Models;
 
 namespace Curso.Api.Profiles;
 
@@ -20,5 +22,8 @@ public class AddressProfile : Profile{
         CreateMap<CreateAddressOfCustomerCommand, Address>();
         CreateMap<Address, RemoveAddressOfCustomerDto>();
         CreateMap<RemoveAddressOfCustomerCommand, Address>();
+
+        CreateMap<UpdateAddressOfCustomerCommand, AddressForUpdateDto>();
+        CreateMap<AddressForUpdateDto, UpdateAddressOfCustomerDto>();
     }
 }

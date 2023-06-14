@@ -16,6 +16,8 @@ using Curso.Api.Features.Customers.Queries.GetCustomerByCpf;
 using Curso.Api.Features.Customers.Queries.GetCustomerWithAddress;
 using Curso.Api.Features.Customers.Queries.GetCustomers;
 using Curso.Api.Features.Customers.Queries.GetCustomersWithAddresses;
+using Curso.Api.Features.Customers.Commands.CreateCustomer;
+using Curso.Api.Features.Customers.Commands.UpdateCustomer;
 
 namespace Curso.Api.Controllers;
 
@@ -84,12 +86,9 @@ public class CustomersController : MainController{
     }
 
     [HttpPost]
-    public async Task<ActionResult<CustomerDto>> CreateCustomer(CustomerForCreationDto customerForCreationDto){
+    public async Task<ActionResult<CustomerDto>> CreateCustomer(CreateCustomerCommand createCustomerCommand){
 
-        var customerEntity = _mapper.Map<Customer>(customerForCreationDto);
-        _customerRepository.AddCustomer(customerEntity);
-        await _customerRepository.SaveChangesAsync();
-        var customerForReturn = _mapper.Map<CustomerDto>(customerEntity);
+        var customerForReturn = await _mediator.Send(createCustomerCommand);
 
 
         return CreatedAtRoute(
@@ -100,15 +99,14 @@ public class CustomersController : MainController{
     }
 
     [HttpPut("{customerId}")]
-    public async Task<ActionResult> UpdateCustomer(int customerId, CustomerForUpdateDto customerForUpdateDto){
+    public async Task<ActionResult> UpdateCustomer(int customerId, UpdateCustomerCommand updateCustomerCommand){
         //verificação de Id pq pode acontecer um ataque malicioso com intenções maléficas de pura maldade
-        if(customerId != customerForUpdateDto.Id){return BadRequest();}
+        if(customerId != updateCustomerCommand.Id){return BadRequest();}
 
         var rightCustomer = await _customerRepository.GetCustomerByIdAsync(customerId);
         if(rightCustomer == null){return NotFound();};
 
-        _customerRepository.UpdateCustomer(customerForUpdateDto, rightCustomer);
-        await _customerRepository.SaveChangesAsync();
+        var customerForReturn = _mediator.Send(updateCustomerCommand);
     
         return NoContent();
     }

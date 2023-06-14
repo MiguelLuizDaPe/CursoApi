@@ -61,7 +61,7 @@ public class CustomerRepository : ICustomerRepository{
 
     public async Task<IEnumerable<Customer>> GetCustomersWithAddressesAsync()
     {
-        return await _context.Customers.Include(c => c.Addresses).ToListAsync();
+        return await _context.Customers.Include(c => c.Addresses).OrderBy(c => c.Id).ToListAsync();
     }
 
     public async Task<Customer?> GetCustomerWithAddressesAsync(int customerId)

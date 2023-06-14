@@ -10,6 +10,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Curso.Api.Features.Addresses.Command.RemoveAddressOfCustomer;
+using Curso.Api.Features.Addresses.Command.UpdateAddressOfCustomer;
 
 namespace Curso.Api.Controllers;
 
@@ -71,6 +72,7 @@ public class AddressesController : MainController{
 
     [HttpPost]
     public async Task<ActionResult<AddressDto>> CreatAddress(int customerId, CreateAddressOfCustomerCommand createAddressOfCustomerCommand){
+        if(customerId != createAddressOfCustomerCommand.CustomerId) return BadRequest();
 
         var customerFromDatabase = await _customerRepository.GetCustomerWithAddressesAsync(customerId);
         if(customerFromDatabase == null){return NotFound();}
@@ -85,8 +87,8 @@ public class AddressesController : MainController{
     }
 
     [HttpPut("{addressId}")]
-    public async Task<ActionResult> UpdateCustomer(int customerId, int addressId, AddressForUpdateDto addressForUpdateDto){
-        if(addressId != addressForUpdateDto.Id){return BadRequest();}
+    public async Task<ActionResult> UpdateCustomer(int customerId, int addressId, UpdateAddressOfCustomerCommand updateAddressOfCustomerCommand){
+        if(addressId != updateAddressOfCustomerCommand.Id){return BadRequest();}
 
         var customerFromDatabase = await _customerRepository.GetCustomerWithAddressesAsync(customerId);
         if(customerFromDatabase == null){return NotFound();}
@@ -94,8 +96,7 @@ public class AddressesController : MainController{
         var rightAddressFromCustomer = customerFromDatabase.Addresses.FirstOrDefault(a => a.Id == addressId);
         if(rightAddressFromCustomer == null){return NotFound();}
 
-        _customerRepository.UpdateAddressInCustomer(addressForUpdateDto, rightAddressFromCustomer);
-        await _customerRepository.SaveChangesAsync();
+        var addressesToReturn = await _mediator.Send(updateAddressOfCustomerCommand);
 
         return NoContent();
     }
@@ -109,7 +110,9 @@ public class AddressesController : MainController{
         if(addressFromCustomer == null){return NotFound();}
         // vai fazer o resto e deixa esse por último
         var removeAddressOfCustomerCommand = new RemoveAddressOfCustomerCommand{Id = addressId, CustomerId = customerId};
-        var coisa = _mediator.Send(removeAddressOfCustomerCommand);
+        var removido = await _mediator.Send(removeAddressOfCustomerCommand);
+
+        if(!removido) return NotFound();
 
         return NoContent();
 

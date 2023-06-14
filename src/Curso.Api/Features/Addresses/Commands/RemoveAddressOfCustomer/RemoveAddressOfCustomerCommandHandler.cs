@@ -8,7 +8,7 @@ namespace Curso.Api.Features.Addresses.Command.RemoveAddressOfCustomer;
 
 // O primeiro parâmetro é o tipo da mensagem
 // O segundo parâmetro é o tipo que se espera receber.
-public class RemoveAddressOfCustomerCommandHandler: IRequestHandler<RemoveAddressOfCustomerCommand, RemoveAddressOfCustomerDto>
+public class RemoveAddressOfCustomerCommandHandler: IRequestHandler<RemoveAddressOfCustomerCommand, bool>
 {
     private readonly ICustomerRepository _customerRepository;
     private readonly IMapper _mapper;
@@ -19,13 +19,12 @@ public class RemoveAddressOfCustomerCommandHandler: IRequestHandler<RemoveAddres
         _mapper = mapper;
     }
 
-    public async Task<RemoveAddressOfCustomerDto> Handle(RemoveAddressOfCustomerCommand request, CancellationToken cancellationToken)
+    async Task<bool> IRequestHandler<RemoveAddressOfCustomerCommand, bool>.Handle(RemoveAddressOfCustomerCommand request, CancellationToken cancellationToken)
     {
         var customerEntity = await _customerRepository.GetCustomerByIdAsync(request.CustomerId);
-        var addressEntity = customerEntity.Addresses.FirstOrDefault(a => a.Id == request.Id); 
+        var addressEntity = customerEntity?.Addresses.FirstOrDefault(a => a.Id == request.Id); 
         _customerRepository.RemoveAddressFromCustomer(addressEntity);
         await _customerRepository.SaveChangesAsync();
-        var addressToReturn = _mapper.Map<RemoveAddressOfCustomerDto>(addressEntity);
-        return addressToReturn;
+        return true;
     }
 }
