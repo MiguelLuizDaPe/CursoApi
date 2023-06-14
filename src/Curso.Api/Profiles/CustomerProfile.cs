@@ -2,6 +2,7 @@ using AutoMapper;
 using Curso.Api.Entities;
 using Curso.Api.Features.Customers.Queries.GetCustomerByCpf;
 using Curso.Api.Features.Customers.Queries.GetCustomerDetail;
+using Curso.Api.Features.Customers.Queries.GetCustomers;
 using Curso.Api.Features.Customers.Queries.GetCustomerWithAddress;
 
 namespace Curso.Api.Profiles;
@@ -23,6 +24,7 @@ public class CustomerProfile : Profile{
         CreateMap<Customer, GetCustomerDetailDto>();
         CreateMap<Customer, GetCustomerByCpfDto>();
         CreateMap<Customer, GetCustomerWithAddressDto>();
-        
+        CreateMap<Customer, GetCustomersDto>();
+
     }
 }

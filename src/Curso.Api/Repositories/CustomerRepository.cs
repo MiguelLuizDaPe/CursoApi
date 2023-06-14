@@ -15,6 +15,8 @@ public class CustomerRepository : ICustomerRepository{
         _mapper = mapper;
     }
 
+    //CUSTOMER//
+
     public async Task<IEnumerable<Customer>> GetCustomersAsync()
     {
         return await _context.Customers.OrderBy(c => c.Id).ToListAsync();
@@ -77,5 +79,34 @@ public class CustomerRepository : ICustomerRepository{
     {
         _mapper.Map(customerWithAddressesForUpdateDto, customer);
         customer.Addresses = customerWithAddressesForUpdateDto.Addresses.Select(a => _mapper.Map<Address>(a)).ToList();
+    }
+
+
+    //ADDRESS//
+
+    public async Task<IEnumerable<Address>> GetAddressesFromCustomerAsync(int customerId)
+    {
+        IEnumerable<Address> addressList = await _context.Addresses.ToListAsync();
+        return addressList.ToList().FindAll(a => a.CustomerId == customerId).OrderBy(c => c.Id);
+    }
+
+    public async Task<Address?> GetAddressFromCustomerAsync(int customerId, int addressId)
+    {
+        return await _context.Addresses.FirstOrDefaultAsync(a => a.CustomerId == customerId && a.Id == addressId);
+    }
+
+    public void AddAddressInCustomer(int customerId, Address address)
+    {
+        _context.Customers.FirstOrDefault(c => c.Id == customerId)?.Addresses.Add(address);
+    }
+
+    public void UpdateAddressInCustomer(AddressForUpdateDto addressForUpdateDto, Address address)
+    {
+        _mapper.Map(addressForUpdateDto, address);
+    }
+
+    public void RemoveAddressFromCustomer(Address address)
+    {
+        _context.Addresses.Remove(address);
     }
 }

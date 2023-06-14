@@ -14,13 +14,13 @@ public class AddressesController : MainController{
 
     // private readonly Data _data;
     private readonly IMapper _mapper;
-    // private readonly CustomerContext _context;
+    private readonly CustomerContext _context;
     private readonly ICustomerRepository _customerRepository;
 
     public AddressesController(/*Data data,*/ IMapper mapper, CustomerContext context, ICustomerRepository customerRepository){//essa porra é uma injeção de dependência
         // _data = data ?? throw new ArgumentNullException(nameof(data));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        // _context = context ?? throw new ArgumentNullException(nameof(context));
+        _context = context ?? throw new ArgumentNullException(nameof(context));
         _customerRepository = customerRepository ?? throw new ArgumentNullException(nameof(customerRepository));
     }
 
@@ -40,24 +40,20 @@ public class AddressesController : MainController{
 
     [HttpGet] //copiar essa porra de alguém depois também
     public async Task<ActionResult<IEnumerable<AddressDto>>> GetAdressesFromCustomer(int customerId){
-        var customerFromDatabase = await _customerRepository.GetCustomerWithAddressesAsync(customerId);
-        if (customerFromDatabase == null){ return NotFound();}
+        var addressesFromDatabase = await _customerRepository.GetAddressesFromCustomerAsync(customerId);
 
-        var addressesToReturn = _mapper.Map<IEnumerable<AddressDto>>(customerFromDatabase.Addresses);
+        var addressesToReturn = _mapper.Map<IEnumerable<AddressDto>>(addressesFromDatabase);
 
+        if (!addressesToReturn.Any()){ return NotFound();}
         return Ok(addressesToReturn);
     }
 
     [HttpGet("{addressId}", Name = "GetAddressById")]
     public async Task<ActionResult<AddressDto>> GetAddressFromCustomer( int customerId, int addressId){
-        var customerFromDatabase = await _customerRepository.GetCustomerWithAddressesAsync(customerId);
-        if(customerFromDatabase == null){return NotFound();}
-
-        var addressFromCustomer = customerFromDatabase.Addresses.FirstOrDefault(a => a.Id == addressId);
-        if(addressFromCustomer == null){return NotFound();}
+        var addressFromCustomer = await _customerRepository.GetAddressFromCustomerAsync(customerId, addressId);
 
         var addressToReturn = _mapper.Map<AddressDto>(addressFromCustomer);
-        // var addressToReturn = new AddressDto{Id = addressFromCustomer.Id, Street = addressFromCustomer.Street, City = addressFromCustomer.City};
+        if(addressToReturn == null) return NotFound();
 
         return Ok(addressToReturn);
 
@@ -73,9 +69,10 @@ public class AddressesController : MainController{
         if(customerFromDatabase == null){return NotFound();}
 
         var addressEntity = _mapper.Map<Address>(addressForCreationDto);
-        // addressEntity.Id = genUniqueAddrId();
-        customerFromDatabase.Addresses.Add(addressEntity);
+
+        _customerRepository.AddAddressInCustomer(customerId, addressEntity);
         _customerRepository.SaveChanges();
+
         var addressToReturn = _mapper.Map<AddressDto>(addressEntity);
 
         return CreatedAtRoute(
@@ -95,7 +92,7 @@ public class AddressesController : MainController{
         var rightAddressFromCustomer = customerFromDatabase.Addresses.FirstOrDefault(a => a.Id == addressId);
         if(rightAddressFromCustomer == null){return NotFound();}
 
-        _mapper.Map(addressForUpdateDto, rightAddressFromCustomer);
+        _customerRepository.UpdateAddressInCustomer(addressForUpdateDto, rightAddressFromCustomer);
         _customerRepository.SaveChanges();
 
         return NoContent();
@@ -109,7 +106,7 @@ public class AddressesController : MainController{
         var addressFromCustomer = customerFromDatabase.Addresses.FirstOrDefault(a => a.Id == addressId);
         if(addressFromCustomer == null){return NotFound();}
 
-        customerFromDatabase.Addresses.Remove(addressFromCustomer);
+        _customerRepository.RemoveAddressFromCustomer(addressFromCustomer);
         _customerRepository.SaveChanges();
 
         return NoContent();

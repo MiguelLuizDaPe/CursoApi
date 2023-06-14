@@ -1824,24 +1824,36 @@
     ]
   },
   "packageFolders": {
-    "/home/miguel/.nuget/packages/": {}
+    "C:\\Users\\7620586\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {},
+    "C:\\Program Files (x86)\\Microsoft\\Xamarin\\NuGet\\": {},
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/Curso.Api.csproj",
+      "projectUniqueName": "C:\\Users\\7620586\\Downloads\\CursoApi\\src\\Curso.Api\\Curso.Api.csproj",
       "projectName": "Curso.Api",
-      "projectPath": "/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/Curso.Api.csproj",
-      "packagesPath": "/home/miguel/.nuget/packages/",
-      "outputPath": "/home/miguel/Projects/Curso/CursoApi/src/Curso.Api/obj/",
+      "projectPath": "C:\\Users\\7620586\\Downloads\\CursoApi\\src\\Curso.Api\\Curso.Api.csproj",
+      "packagesPath": "C:\\Users\\7620586\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\7620586\\Downloads\\CursoApi\\src\\Curso.Api\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
+        "C:\\Program Files (x86)\\Microsoft\\Xamarin\\NuGet\\",
+        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+      ],
       "configFilePaths": [
-        "/home/miguel/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\7620586\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net7.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -1906,12 +1918,6 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
-        "downloadDependencies": [
-          {
-            "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[7.0.5, 7.0.5]"
-          }
-        ],
         "frameworkReferences": {
           "Microsoft.AspNetCore.App": {
             "privateAssets": "none"
@@ -1920,7 +1926,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/7.0.105/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.100\\RuntimeIdentifierGraph.json"
       }
     }
   }

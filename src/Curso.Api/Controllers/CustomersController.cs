@@ -14,6 +14,7 @@ using MediatR;
 using Curso.Api.Features.Customers.Queries.GetCustomerDetail;
 using Curso.Api.Features.Customers.Queries.GetCustomerByCpf;
 using Curso.Api.Features.Customers.Queries.GetCustomerWithAddress;
+using Curso.Api.Features.Customers.Queries.GetCustomers;
 
 namespace Curso.Api.Controllers;
 
@@ -50,8 +51,8 @@ public class CustomersController : MainController{
 
     [HttpGet]//não sei como fazer esse
     public async Task<ActionResult<IEnumerable<CustomerDto>>> GetCustomers(){//callback hell da uma pesquisadinha depois
-       var customersFromDatabase = await _customerRepository.GetCustomersAsync();
-       var customersForReturn = _mapper.Map<IEnumerable<CustomerDto>>(customersFromDatabase);
+        var getCustomers = new GetCustomersQuery();
+        var customersForReturn = await _mediator.Send(getCustomers);
 
        return Ok(customersForReturn);
     }
