@@ -17,6 +17,6 @@ public class Address{
     public string City {get; set;} = "";
 
     [ForeignKey("CustomerId")]
-    public Customer? Customer {get;set;}//colocar somente quando necessário pos pode induzir erros no código
+    //public Customer? Customer {get;set;}//colocar somente quando necessário pos pode induzir erros no código
     public int CustomerId {get;set;}
 }
