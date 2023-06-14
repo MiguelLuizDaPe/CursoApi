@@ -1,10 +1,15 @@
 using AutoMapper;
 using Curso.Api.DbContexts;
 using Curso.Api.Entities;
+using Curso.Api.Features.Addresses.Queries.GetAddressesOfCustomer;
+using Curso.Api.Features.Addresses.Queries.GetAddressOfCustomer;
+using Curso.Api.Features.Addresses.Command.CreateAddressOfCustomer;
 using Curso.Api.Models;
 using Curso.Api.Repositories;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Curso.Api.Features.Addresses.Command.RemoveAddressOfCustomer;
 
 namespace Curso.Api.Controllers;
 
@@ -16,12 +21,15 @@ public class AddressesController : MainController{
     private readonly IMapper _mapper;
     private readonly CustomerContext _context;
     private readonly ICustomerRepository _customerRepository;
+    private readonly IMediator _mediator; 
 
-    public AddressesController(/*Data data,*/ IMapper mapper, CustomerContext context, ICustomerRepository customerRepository){//essa porra é uma injeção de dependência
+
+    public AddressesController(/*Data data,*/ IMapper mapper, CustomerContext context, ICustomerRepository customerRepository, IMediator mediator){//essa porra é uma injeção de dependência
         // _data = data ?? throw new ArgumentNullException(nameof(data));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _customerRepository = customerRepository ?? throw new ArgumentNullException(nameof(customerRepository));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
 
     // private int addrIdMax = 0;
@@ -40,9 +48,8 @@ public class AddressesController : MainController{
 
     [HttpGet] //copiar essa porra de alguém depois também
     public async Task<ActionResult<IEnumerable<AddressDto>>> GetAdressesFromCustomer(int customerId){
-        var addressesFromDatabase = await _customerRepository.GetAddressesFromCustomerAsync(customerId);
-
-        var addressesToReturn = _mapper.Map<IEnumerable<AddressDto>>(addressesFromDatabase);
+        var getAddressesOfCustomerQuery = new GetAddressesOfCustomerQuery{CustomerId = customerId};
+        var addressesToReturn = await _mediator.Send(getAddressesOfCustomerQuery);
 
         if (!addressesToReturn.Any()){ return NotFound();}
         return Ok(addressesToReturn);
@@ -50,9 +57,9 @@ public class AddressesController : MainController{
 
     [HttpGet("{addressId}", Name = "GetAddressById")]
     public async Task<ActionResult<AddressDto>> GetAddressFromCustomer( int customerId, int addressId){
-        var addressFromCustomer = await _customerRepository.GetAddressFromCustomerAsync(customerId, addressId);
+        var getAddressOfCustomerQuery = new GetAddressOfCustomerQuery{CustomerId = customerId, Id = addressId};
+        var addressToReturn = await _mediator.Send(getAddressOfCustomerQuery);
 
-        var addressToReturn = _mapper.Map<AddressDto>(addressFromCustomer);
         if(addressToReturn == null) return NotFound();
 
         return Ok(addressToReturn);
@@ -63,17 +70,12 @@ public class AddressesController : MainController{
     }
 
     [HttpPost]
-    public async Task<ActionResult<AddressDto>> CreatAddress(int customerId, AddressForCreationDto addressForCreationDto){
+    public async Task<ActionResult<AddressDto>> CreatAddress(int customerId, CreateAddressOfCustomerCommand createAddressOfCustomerCommand){
 
         var customerFromDatabase = await _customerRepository.GetCustomerWithAddressesAsync(customerId);
         if(customerFromDatabase == null){return NotFound();}
 
-        var addressEntity = _mapper.Map<Address>(addressForCreationDto);
-
-        _customerRepository.AddAddressInCustomer(customerId, addressEntity);
-        _customerRepository.SaveChanges();
-
-        var addressToReturn = _mapper.Map<AddressDto>(addressEntity);
+        var addressToReturn = await _mediator.Send(createAddressOfCustomerCommand);
 
         return CreatedAtRoute(
             "GetAddressById",
@@ -93,21 +95,21 @@ public class AddressesController : MainController{
         if(rightAddressFromCustomer == null){return NotFound();}
 
         _customerRepository.UpdateAddressInCustomer(addressForUpdateDto, rightAddressFromCustomer);
-        _customerRepository.SaveChanges();
+        await _customerRepository.SaveChangesAsync();
 
         return NoContent();
     }
 
-    [HttpDelete("{addressId}")]
+    [HttpDelete("{addressId}")]//tenta pegar com alguem essa porra de remove(isso ta uma vergonha)
     public async Task<ActionResult> DeleteAddress(int customerId, int addressId){
         var customerFromDatabase = await _customerRepository.GetCustomerWithAddressesAsync(customerId);
         if(customerFromDatabase == null){return NotFound();}
 
         var addressFromCustomer = customerFromDatabase.Addresses.FirstOrDefault(a => a.Id == addressId);
         if(addressFromCustomer == null){return NotFound();}
-
-        _customerRepository.RemoveAddressFromCustomer(addressFromCustomer);
-        _customerRepository.SaveChanges();
+        // vai fazer o resto e deixa esse por último
+        var removeAddressOfCustomerCommand = new RemoveAddressOfCustomerCommand{Id = addressId, CustomerId = customerId};
+        var coisa = _mediator.Send(removeAddressOfCustomerCommand);
 
         return NoContent();
 

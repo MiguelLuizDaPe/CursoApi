@@ -11,7 +11,7 @@ public interface ICustomerRepository{
     Task<Customer?> GetCustomerByIdAsync(int customerId);
     Task<Customer?> GetCustomerByCpfAsync(string customerCpf);
     void AddCustomer(Customer customerEntity);
-    void SaveChanges();
+    Task<bool> SaveChangesAsync();
     void RemoveCustomer(Customer customer);
     void UpdateCustomer(CustomerForUpdateDto customerForUpdateDto, Customer customer);
     void PatchCustomer(CustomerForPatchDto customerForPatchDto, Customer customer);

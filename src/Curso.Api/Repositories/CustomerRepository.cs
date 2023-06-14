@@ -37,9 +37,9 @@ public class CustomerRepository : ICustomerRepository{
         _context.Customers.Add(customerEntity);
     }
 
-    public void SaveChanges()
+    public async Task<bool> SaveChangesAsync()
     {
-        _context.SaveChanges();
+        return (await _context.SaveChangesAsync() > 0);
 
     }
 

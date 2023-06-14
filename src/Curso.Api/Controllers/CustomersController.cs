@@ -15,6 +15,7 @@ using Curso.Api.Features.Customers.Queries.GetCustomerDetail;
 using Curso.Api.Features.Customers.Queries.GetCustomerByCpf;
 using Curso.Api.Features.Customers.Queries.GetCustomerWithAddress;
 using Curso.Api.Features.Customers.Queries.GetCustomers;
+using Curso.Api.Features.Customers.Queries.GetCustomersWithAddresses;
 
 namespace Curso.Api.Controllers;
 
@@ -83,11 +84,11 @@ public class CustomersController : MainController{
     }
 
     [HttpPost]
-    public ActionResult<CustomerDto> CreateCustomer(CustomerForCreationDto customerForCreationDto){
+    public async Task<ActionResult<CustomerDto>> CreateCustomer(CustomerForCreationDto customerForCreationDto){
 
         var customerEntity = _mapper.Map<Customer>(customerForCreationDto);
         _customerRepository.AddCustomer(customerEntity);
-        _customerRepository.SaveChanges();
+        await _customerRepository.SaveChangesAsync();
         var customerForReturn = _mapper.Map<CustomerDto>(customerEntity);
 
 
@@ -107,7 +108,7 @@ public class CustomersController : MainController{
         if(rightCustomer == null){return NotFound();};
 
         _customerRepository.UpdateCustomer(customerForUpdateDto, rightCustomer);
-        _customerRepository.SaveChanges();
+        await _customerRepository.SaveChangesAsync();
     
         return NoContent();
     }
@@ -117,7 +118,7 @@ public class CustomersController : MainController{
         var customer = await _customerRepository.GetCustomerByIdAsync(customerId);
         if(customer == null){return NotFound();}
         _customerRepository.RemoveCustomer(customer);
-        _customerRepository.SaveChanges();
+        await _customerRepository.SaveChangesAsync();
         return NoContent();
     }
 
@@ -136,7 +137,7 @@ public class CustomersController : MainController{
         }
 
         _customerRepository.PatchCustomer(customerToPatchDto, customerFromDatabase);
-        _customerRepository.SaveChanges();
+        await _customerRepository.SaveChangesAsync();
 
         return NoContent();
 
@@ -144,10 +145,9 @@ public class CustomersController : MainController{
 
     [HttpGet("with-address")]//não sei como fazer esse
     public async Task<ActionResult<IEnumerable<CustomerWithAddressesDto>>> GetCustomersWithAddresses(){
-        
-        var customersFromDatabase = await _customerRepository.GetCustomersWithAddressesAsync();
 
-       var customersForReturn = _mapper.Map<IEnumerable<CustomerWithAddressesDto>>(customersFromDatabase);
+        var getCustomersWithAddresses = new GetCustomersWithAddressesQuery();
+        var customersForReturn = await _mediator.Send(getCustomersWithAddresses);
 
         return Ok(customersForReturn); // O customerToReturn não precisa de .ToList() pq o Ok() serializa
     }
@@ -163,14 +163,14 @@ public class CustomersController : MainController{
     }
 
     [HttpPost("with-address")]
-    public ActionResult<CustomerWithAddressesDto> CreatCustomerWithAddresses(CustomerWithAddressesForCreationDto customerWithAddressesForCreationDto){
+    public async Task<ActionResult<CustomerWithAddressesDto>> CreatCustomerWithAddresses(CustomerWithAddressesForCreationDto customerWithAddressesForCreationDto){
             // int n = 0;
             // int x = n++ + ++n;
 
         var customerEntity = _mapper.Map<Customer>(customerWithAddressesForCreationDto);
 
         _customerRepository.AddCustomerWithAddresses(customerEntity);
-        _customerRepository.SaveChanges();
+        await _customerRepository.SaveChangesAsync();
 
         var customerForReturn = _mapper.Map<CustomerWithAddressesDto>(customerEntity);
 
@@ -190,7 +190,7 @@ public class CustomersController : MainController{
         if(rightCustomer == null){ return NotFound();}
 
         _customerRepository.UpdateCustomerWithAddresses(customerWithAddressesForUpdateDto, rightCustomer);
-        _customerRepository.SaveChanges();
+        await _customerRepository.SaveChangesAsync();
 
         return NoContent();
 
