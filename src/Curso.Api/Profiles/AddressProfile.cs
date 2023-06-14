@@ -25,5 +25,6 @@ public class AddressProfile : Profile{
 
         CreateMap<UpdateAddressOfCustomerCommand, AddressForUpdateDto>();
         CreateMap<AddressForUpdateDto, UpdateAddressOfCustomerDto>();
+        CreateMap<AddressDto, Address>();
     }
 }

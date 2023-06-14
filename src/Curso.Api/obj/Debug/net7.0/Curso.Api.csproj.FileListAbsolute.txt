@@ -222,3 +222,13 @@ C:\Users\7620586\Downloads\CursoApi\src\Curso.Api\obj\Debug\net7.0\refint\Curso.
 C:\Users\7620586\Downloads\CursoApi\src\Curso.Api\obj\Debug\net7.0\Curso.Api.pdb
 C:\Users\7620586\Downloads\CursoApi\src\Curso.Api\obj\Debug\net7.0\Curso.Api.genruntimeconfig.cache
 C:\Users\7620586\Downloads\CursoApi\src\Curso.Api\obj\Debug\net7.0\ref\Curso.Api.dll
+C:\Users\7620586\Downloads\CursoApi\src\Curso.Api\bin\Debug\net7.0\appsettings.Development.json
+C:\Users\7620586\Downloads\CursoApi\src\Curso.Api\bin\Debug\net7.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\7620586\Downloads\CursoApi\src\Curso.Api\bin\Debug\net7.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\7620586\Downloads\CursoApi\src\Curso.Api\bin\Debug\net7.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\7620586\Downloads\CursoApi\src\Curso.Api\bin\Debug\net7.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\7620586\Downloads\CursoApi\src\Curso.Api\bin\Debug\net7.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\7620586\Downloads\CursoApi\src\Curso.Api\bin\Debug\net7.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\7620586\Downloads\CursoApi\src\Curso.Api\bin\Debug\net7.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\7620586\Downloads\CursoApi\src\Curso.Api\bin\Debug\net7.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\7620586\Downloads\CursoApi\src\Curso.Api\bin\Debug\net7.0\Curso.Api.xml

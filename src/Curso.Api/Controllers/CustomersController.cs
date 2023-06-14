@@ -18,11 +18,15 @@ using Curso.Api.Features.Customers.Queries.GetCustomers;
 using Curso.Api.Features.Customers.Queries.GetCustomersWithAddresses;
 using Curso.Api.Features.Customers.Commands.CreateCustomer;
 using Curso.Api.Features.Customers.Commands.UpdateCustomer;
+using Curso.Api.Features.Customers.Commands.RemoveCustomer;
+using Curso.Api.Features.Customers.Commands.CreateCustomerWithAddress;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Curso.Api.Controllers;
 
 [ApiController]
 [Route("api/customers")]
+[Authorize]
 public class CustomersController : MainController{
 
     private readonly Data _data;
@@ -115,8 +119,10 @@ public class CustomersController : MainController{
     public async Task<ActionResult<CustomerDto>> DeleteCustomer(int customerId){
         var customer = await _customerRepository.GetCustomerByIdAsync(customerId);
         if(customer == null){return NotFound();}
-        _customerRepository.RemoveCustomer(customer);
-        await _customerRepository.SaveChangesAsync();
+
+        var removeCustomerCommand = new RemoveCustomerCommand{Id = customerId};
+        await _mediator.Send(removeCustomerCommand);
+
         return NoContent();
     }
 
@@ -161,16 +167,11 @@ public class CustomersController : MainController{
     }
 
     [HttpPost("with-address")]
-    public async Task<ActionResult<CustomerWithAddressesDto>> CreatCustomerWithAddresses(CustomerWithAddressesForCreationDto customerWithAddressesForCreationDto){
+    public async Task<ActionResult<CustomerWithAddressesDto>> CreatCustomerWithAddresses(CreateCustomerWithAddressCommand createCustomerWithAddressCommand){
             // int n = 0;
             // int x = n++ + ++n;
 
-        var customerEntity = _mapper.Map<Customer>(customerWithAddressesForCreationDto);
-
-        _customerRepository.AddCustomerWithAddresses(customerEntity);
-        await _customerRepository.SaveChangesAsync();
-
-        var customerForReturn = _mapper.Map<CustomerWithAddressesDto>(customerEntity);
+        var customerForReturn = await _mediator.Send(createCustomerWithAddressCommand);
 
         return CreatedAtRoute(
             "GetCustomerByIdWithAddresses",

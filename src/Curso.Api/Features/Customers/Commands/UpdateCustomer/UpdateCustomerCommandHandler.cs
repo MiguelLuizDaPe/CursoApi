@@ -21,8 +21,10 @@ public class UpdateCustomerCommandHandler : IRequestHandler<UpdateCustomerComman
     {
         var rightCustomer = await _customerRepository.GetCustomerByIdAsync(request.Id);
         var customerForUpdateDto = _mapper.Map<CustomerForUpdateDto>(request);
+
         _customerRepository.UpdateCustomer(customerForUpdateDto, rightCustomer);
         await _customerRepository.SaveChangesAsync();
+        
         var customerForReturn = _mapper.Map<UpdateCustomerDto>(customerForUpdateDto);
         return customerForReturn;
     }

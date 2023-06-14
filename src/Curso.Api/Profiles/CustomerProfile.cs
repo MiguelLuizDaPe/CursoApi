@@ -7,6 +7,8 @@ using Curso.Api.Features.Customers.Queries.GetCustomerWithAddress;
 using Curso.Api.Features.Customers.Queries.GetCustomersWithAddresses;
 using Curso.Api.Models;
 using Curso.Api.Features.Customers.Commands.UpdateCustomer;
+using Curso.Api.Features.Customers.Commands.CreateCustomer;
+using Curso.Api.Features.Customers.Commands.CreateCustomerWithAddress;
 
 namespace Curso.Api.Profiles;
 
@@ -29,8 +31,12 @@ public class CustomerProfile : Profile{
         CreateMap<Customer, GetCustomerWithAddressDto>();
         CreateMap<Customer, GetCustomersWithAddressesDto>();
         CreateMap<Customer, GetCustomersDto>();
+        CreateMap<CreateCustomerCommand, Customer>();
+        CreateMap<Customer, CreateCustomerDto>();
         CreateMap<UpdateCustomerCommand, CustomerForUpdateDto>();
         CreateMap<CustomerForUpdateDto, UpdateCustomerDto>();
 
+        CreateMap<CreateCustomerWithAddressCommand, Customer>();
+        CreateMap<Customer, CreateCustomerWithAddressDto>();
     }
 }

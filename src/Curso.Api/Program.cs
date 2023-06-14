@@ -1,3 +1,5 @@
+using System.Reflection;
+using System.Text;
 using Curso.Api;
 using Curso.Api.Configuration;
 using Curso.Api.DbContexts;
@@ -6,6 +8,7 @@ using Curso.Api.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,9 +20,23 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());//injeta
 builder.Services.AddSingleton<Data>();//injetamo o Data como singleton (eu acho, não entendi onde o bagulho ta injetando)
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 
+builder.Services.AddAuthentication("Bearer").AddJwtBearer( options => {
+    options.TokenValidationParameters = new(){
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Authentication:Issuer"],
+        ValidAudience = builder.Configuration["Authentication:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["Authentication:SecretKey"]!)
+            )
+        };
+    }
+);
+
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
 
-builder.Services.AddDbContext<CustomerContext>(options => options.UseNpgsql("Host=localhost;Database=Curso;Username=miguel;Password=123456"));//pro curso o username é postgres e em casa é miguel
+builder.Services.AddDbContext<CustomerContext>(options => options.UseNpgsql("Host=localhost;Database=Curso;Username=postgres;Password=123456"));//pro curso o username é postgres e em casa é miguel
 
 // Add services to the container.
 //aqui foi configurado pra transformar em .json(eu acho)
@@ -69,7 +86,11 @@ builder.Services.AddControllers(options => options.InputFormatters.Insert(0, MyJ
 
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(/*setupAction =>
+{
+    var xmlCommentsFile = $"{Assembly.GetExecutingAssembly.}";
+}*/
+);
 
 var app = builder.Build();
 
@@ -81,6 +102,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();//Mediwers (a ordem desses puto importa)
 app.UseAuthorization();
 
 app.MapControllers();

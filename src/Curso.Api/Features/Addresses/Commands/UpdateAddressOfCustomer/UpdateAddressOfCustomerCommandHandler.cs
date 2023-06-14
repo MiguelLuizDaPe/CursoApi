@@ -24,8 +24,10 @@ public class UpdateAddressOfCustomerCommandHandler: IRequestHandler<UpdateAddres
     {
         var rightAddressFromCustomer = await _customerRepository.GetAddressFromCustomerAsync(request.CustomerId, request.Id);
         var addressForUpdateDto = _mapper.Map<AddressForUpdateDto>(request);
+        
         _customerRepository.UpdateAddressInCustomer(addressForUpdateDto, rightAddressFromCustomer);
         await _customerRepository.SaveChangesAsync();
+
         var addressesToReturn = _mapper.Map<UpdateAddressOfCustomerDto>(addressForUpdateDto);
         return addressesToReturn;
     }
